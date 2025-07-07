@@ -1,5 +1,4 @@
 #include "timer.hpp"
-#include <ctime>
 #include <pdcurses.h>
 
 time_t timer::start = time(nullptr);
@@ -24,15 +23,10 @@ bool timer::time_out() const{
     return time_left() == 0;
 }
 
-void timer::display(int y, int x, WINDOW *window) const {
+void timer::display(WINDOW *window, int y, int x) const {
     int r = time_left();
     int minutes = r / 60;
     int seconds = r % 60;
-    mvwprintw(window, y, x, "%02d:%02d", minutes, seconds);
+    mvwprintw(window, y, x, "%d:%02d", minutes, seconds);
     wrefresh(window);
-}
-
-void timer::wait_one_second() const{
-    time_t start = time(nullptr);
-    while (time(nullptr) == start);
 }

@@ -12,8 +12,7 @@ public:
 
     int time_left() const;
     bool time_out() const;
-    void display(int y, int x, WINDOW* window) const;
-    void wait_one_second() const;
+    void display(WINDOW* window, int y, int x) const;
 };
 
 
