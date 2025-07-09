@@ -1,5 +1,5 @@
-#include "Grid.h"
-#include "Items.h"
+#include "Grid.hpp"
+#include "Items.hpp"
 #include <iostream>
 #include <ctime>
 #include <ncurses.h>
@@ -8,15 +8,18 @@ using namespace std;
 Grid::Grid(int columns, int rows) { //Inizializzo la matrice a inizio partita
     endgame = false; //questo campo diventa true solo se il serpente si mangia o finisce il tempo, ci si accede con endgame(bool flag)
     score = 0; //inizializzo anche lo score
+    counter = 1; //counter che aumenta ogni volta che creo un nuovo oggetto (in pratica è l'id di ogni oggetto)
+    //   allid = nullptr;
     for (int i = 0; i < columns; i++) {
         for (int j = 0; j < rows; j++) {
             matrix[i][j].occupied = false;
             matrix[i][j].item = 'e';
+            matrix[i][j].id = 0;
         }
     }
 }
 
-void Grid::Updatemtx(bool *mtx[][100], bool *mtH[][100]) { //ad ogni ciclo aggiorno la mia matrice
+void Grid::Updatemtx(bool *mtx[][cols], bool *mtH[][cols]) { //a ogni ciclo aggiorno la mia matrice
     for (int i = 0; i < rows; i++) { //per ogni riga
         for (int j = 0; j < cols; j++) { //per ogni colonna
             if (*mtx[i][j] == true) { //Se è un pezzo del serpente
@@ -34,12 +37,12 @@ void Grid::Updatemtx(bool *mtx[][100], bool *mtH[][100]) { //ad ogni ciclo aggio
                 {
                     if (matrix[i][j].item == 's')
                     { //Case;: serpente si è mangiato da solo, setto l'endgame a true
-                        Grid::setendgame(true);
+                        setendgame(true);
                         matrix[i][j].item = 'h';
                     }
                     else if (matrix[i][j].item == 'a' || matrix[i][j].item == 'b' || matrix[i][j].item == 'c') //Case: serpente ha mangiato qualcosa nel punto (y,x)
                     {
-                    Grid::Collision(i, j);
+                    Collision(i, j);
                     }
                 }
             }
@@ -51,20 +54,60 @@ void Grid::Updatemtx(bool *mtx[][100], bool *mtH[][100]) { //ad ogni ciclo aggio
     }
 }
 
-bool Grid::isendgame() { //funzione che tommaso deve chiamare ad ogni ciclo
+void Grid::Collision(int i, int j) { //la implemento appena ho finito con le funzioni di Items
+    pos cell;
+    cell.i = i;
+    cell.j = j;
+    score = score + Items::getpoints(matrix[i][j].id);
+    Grid::removeItem(matrix[i][j].id);
+}
+
+void Grid::addItem(int difficulty) {
+    Items::newitem(difficulty, counter); //creo un nuovo item con id counter
+    pos position = Items::getposition(counter); //salvo in pos le coordinate dell'item
+    while (matrix[position.i][position.i].occupied == true) { //controllo che non sia un punto già occupato
+        position = Items::changepos(counter); //creo due nuove coordinate
+    }
+    matrix[position.i][position.j].occupied = true; //il nuovo posto viene segnato come occupato
+    matrix[position.i][position.j].item = Items::getitem(counter); //specifico che tipo di item è
+    matrix[position.i][position.j].id = counter; //salvo nella cella l'id dell'item
+    //          /Timer::starttimer(Items::gettime(counter))
+    counter++;
+}
+
+void Grid::removeItem(int id) {
+    if (Items::checkid(id)) { //se l'oggetto è ancora in campo e va rimosso
+        pos coords = Items::getposition(id);
+        if (Items::gettime(id) == 0) { //se l'oggetto va rimosso perchè il timer è expired
+            matrix[coords.i][coords.j].occupied = false;
+            matrix[coords.i][coords.j].item = 'e';
+            matrix[coords.i][coords.j].id = 0;
+            Items::removeitem(id);
+        }
+        else if (Items::gettime(id) != 0){
+            matrix[coords.i][coords.j].occupied = true;
+            matrix[coords.i][coords.j].item = 'h';
+            matrix[coords.i][coords.j].id = 0;
+            Items::removeitem(id);
+        }
+    }
+ //se il timer ha chiamato la funzione per eliminare un oggetto già mangiato non bisogna fare nulla
+}
+
+bool Grid::isendgame() { //funzione che tommaso deve chiamare a ogni ciclo
     return endgame;
 }
-void Grid::setendgame(bool flag) {
+void Grid::setendgame(bool flag) { //funzione che segnala la fine del gioco
     endgame = flag;
 }
 
-void Grid::Collision(int i, int j) { //la implemento appena ho finito con le funzioni di Items
-    if (matrix[i][j].occupied == true && matrix[i][j].item == 'a')
-    {
+void UpdateScore(WINDOW * info_win) {
 
-    }
 }
 
+void UpdateGrid(WINDOW *game_win) {
+
+}
 /*   TUTTE FUNZIONI VECCHIE CHE POI ELIMINO
 //PER TOMMASO MOLTO IMPORTANTE la funzione che devi controllare per sapere se il serpente si mangia da solo è questa
 //NON ANCORA IMPLEMENTATA DEL TUTTO (manca effetto pacman)
