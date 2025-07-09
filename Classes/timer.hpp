@@ -5,14 +5,18 @@
 
 class timer {
 protected:
-    static const int seconds = 180;
-    static time_t start;
+     static int seconds;
+     static int paused_seconds;
+     static time_t start;
+     static time_t pause;
+     static bool is_paused;
 public:
-    timer();
-
-    int time_left() const;
-    bool time_out() const;
-    void display(WINDOW* window, int y, int x) const;
+    timer(int minutes);
+    static void pause_timer();
+    static void resume_timer();
+    static int time_left();
+    static bool time_out();
+    static void display(WINDOW* window, int y, int x);
 };
 
 
