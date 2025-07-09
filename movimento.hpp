@@ -10,12 +10,12 @@ struct lista {
     lista *next;
 };
 typedef lista *plista;
-const double tempo=200;
-const int alt=25;
-const int larg=100;
-int start_y=0;
-int start_x=0;
-int lserp=10;
+constexpr double tempo=200;
+constexpr int alt=25;
+constexpr int larg=100;
+extern int start_y;
+extern int start_x;
+extern int lserp;
 class snake {
 protected:
     plista head;

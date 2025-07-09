@@ -1,4 +1,7 @@
 #include "movimento.hpp"
+int start_y=0;
+int start_x=0;
+int lserp=10;
 plista snake::crea_corpo(plista head, int ax, int ord, char c) {
     plista tmp= new lista;
     tmp->x=ax;
