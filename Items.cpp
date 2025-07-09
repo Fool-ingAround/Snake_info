@@ -4,9 +4,8 @@
 #include <ctime>
 #include <string>
 #include <cstdlib>
-#include "timer.h"
-
-#include "Grid.h"
+//#include "timer.hpp"
+#include "Grid.hpp"
 using namespace std;
 
 pitemlist Items::head = nullptr;

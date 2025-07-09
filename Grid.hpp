@@ -8,12 +8,12 @@ struct sgrid {
     int id; //id (identifica il numero dell'oggetto)
 };
 
-const int rows = 25;
-const int cols = 100;
-const int COLOR_SNAKE = 8;
-const int COLOR_APPLE = 9;
-const int COLOR_BANANA = 10;
-const int COLOR_CHERRY = 11;
+constexpr int rows = 25;
+constexpr int cols = 100;
+constexpr int COLOR_SNAKE = 8;
+constexpr int COLOR_APPLE = 9;
+constexpr int COLOR_BANANA = 10;
+constexpr int COLOR_CHERRY = 11;
 
 class Grid {
 protected:
@@ -23,7 +23,7 @@ protected:
     int counter; //lo uso per dare gli id agli oggetti
 public:
 
-    Grid(int columns, int rows);
+    Grid(int rows, int columns);
     void Updatemtx(bool *mtx[][100], bool *mtH[][100]); //aggiorna la matrice
     void Collision(int i, int j); //collisione con oggetto
     void addItem(int difficulty); //aggiunge un item (devo ancora implementare la funzione che ne aggiunga uno periodicamente)
@@ -36,6 +36,7 @@ public:
     void setendgame(bool flag); //serve a cambiare il valore di endgame
     void UpdateScore(WINDOW * info_win);
     void UpdateGrid(WINDOW* game_win);
+    void provagrid(int a, int b, int c, int d);
 };
 
 #endif //GRID_HPP

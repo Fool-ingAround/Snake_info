@@ -1,17 +1,16 @@
 #include "Grid.hpp"
 #include "Items.hpp"
 #include <iostream>
-#include <ctime>
 #include <ncurses.h>
 using namespace std;
 
-Grid::Grid(int columns, int rows) { //Inizializzo la matrice a inizio partita
+Grid::Grid(int rows, int columns) { //Inizializzo la matrice a inizio partita
     endgame = false; //questo campo diventa true solo se il serpente si mangia o finisce il tempo, ci si accede con endgame(bool flag)
     score = 0; //inizializzo anche lo score
     counter = 1; //counter che aumenta ogni volta che creo un nuovo oggetto (in pratica è l'id di ogni oggetto)
     //   allid = nullptr;
-    for (int i = 0; i < columns; i++) {
-        for (int j = 0; j < rows; j++) {
+    for (int i = 0; i < rows; i++) {
+        for (int j = 0; j < columns; j++) {
             matrix[i][j].occupied = false;
             matrix[i][j].item = 'e';
             matrix[i][j].id = 0;
@@ -244,3 +243,22 @@ void Grid::Collision(int y, int x) { //ancora da implementare
 }
 
 */
+void Grid::provagrid(int a, int b, int c, int d) {
+    for (int i = 0; i < 25; i++) {
+        for (int j = 0; j < 100; j++) {
+            if (i == a && j >= b && j < c) {
+                matrix[i][j].occupied = true;
+                matrix[i][j].item = 's';
+            }
+            if (i == a && j == c) {
+                matrix[i][j].occupied = true;
+                matrix[i][j].item = 'h';
+            }
+            else if (i == 3 && j == d){
+            matrix[i][j].occupied = true;
+                matrix[i][j].item = 'A';
+                matrix[i][j].id = 1;
+            }
+        }
+    }
+}
