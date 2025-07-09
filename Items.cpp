@@ -86,7 +86,7 @@ bool Items::checkid(int id) {
         tmp = tmp->next;
     }
     if (tmp == nullptr) return false;
-    else if (tmp->id == id) return true;
+    else return true;
 }
 
 pos Items::changepos(int id) {

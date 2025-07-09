@@ -16,7 +16,15 @@ Grid::Grid(int columns, int rows) { //Inizializzo la matrice a inizio partita
             matrix[i][j].item = 'e';
             matrix[i][j].id = 0;
         }
-    }
+    } //qui inizializzo tutti i colori e le coppie belle
+    init_color(COLOR_SNAKE,   0, 1000, 0);
+    init_color(COLOR_APPLE,     1000, 200, 200);
+    init_color(COLOR_BANANA,  1000, 1000, 0);
+    init_color(COLOR_CHERRY, 1000, 0, 0);
+    init_pair(1, COLOR_SNAKE, COLOR_BLACK);   // Colore dello snake
+    init_pair(2, COLOR_APPLE, COLOR_BLACK);     // Colore Mela
+    init_pair(3, COLOR_BANANA, COLOR_BLACK);  // Colore Banana
+    init_pair(4, COLOR_CHERRY, COLOR_BLACK); // Colore Pesca
 }
 
 void Grid::Updatemtx(bool *mtx[][cols], bool *mtH[][cols]) { //a ogni ciclo aggiorno la mia matrice
@@ -101,13 +109,82 @@ void Grid::setendgame(bool flag) { //funzione che segnala la fine del gioco
     endgame = flag;
 }
 
-void UpdateScore(WINDOW * info_win) {
+void Grid::UpdateGrid(WINDOW *game_win) {
+    wclear(game_win);
+    wrefresh(game_win);
+    for (int i = 0; i < rows; i++) {
+        for (int j = 0; j < cols; j++) {
+            switch (matrix[i][j].item) {
+                case 'h':
+                    mvwaddch(game_win, i, j, '@' | COLOR_PAIR(1));
+                    break;
 
+                case 's':
+                    mvwaddch(game_win, i, j, 'o' | COLOR_PAIR(1));
+                    break;
+
+                case 'A':
+                    mvwaddch(game_win, i, j, 'A' | COLOR_PAIR(2));
+                    break;
+
+                case 'B':
+                    mvwaddch(game_win, i, j, 'B' | COLOR_PAIR(3));
+                    break;
+
+                case 'C':
+                    mvwaddch(game_win, i, j, 'C' | COLOR_PAIR(4));
+                    break;
+                default:
+                    //mvwaddch(game_win, i, j, ' ');
+                    break;
+            }
+        }
+    }
+    wrefresh(game_win);
 }
 
-void UpdateGrid(WINDOW *game_win) {
-
+void Grid::UpdateScore(WINDOW * info_win) {
+mvwprintw(info_win, 0, 0, "%i", score);
+    wrefresh(info_win);
 }
+
+/*
+void Grid::UpdateGrid(WINDOW *game_win) {
+    char stampa;
+    for (int i = 0; i < rows; i++) {
+        for (int j = 0; j < cols; j++) {
+            switch (matrix[i][j].item) {
+                case 'h':
+                    stampa = '@';
+                    mvprintw(i, j, "%c", stampa);
+                    break;
+
+                case 's':
+                    stampa = 'o';
+                    mvprintw(i, j, "%c", stampa);
+                    break;
+
+                case 'A':
+                    stampa = 'A';
+                    mvprintw(i, j, "%c", stampa);
+                    break;
+
+                case 'B':
+                    stampa = 'B';
+                    mvprintw(i, j, "%c", stampa);
+                    break;
+
+                case 'C':
+                    stampa = 'C';
+                    mvprintw(i, j, "%c", stampa);
+                    break;
+                default:
+            }
+        }
+    }
+}
+*/
+//mvaddch(y, x, matrix[y][x]);
 /*   TUTTE FUNZIONI VECCHIE CHE POI ELIMINO
 //PER TOMMASO MOLTO IMPORTANTE la funzione che devi controllare per sapere se il serpente si mangia da solo è questa
 //NON ANCORA IMPLEMENTATA DEL TUTTO (manca effetto pacman)
