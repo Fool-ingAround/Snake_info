@@ -1,14 +1,8 @@
 #include "timer.hpp"
 #include <pdcurses.h>
 
-int timer::seconds = 0;
-time_t timer::start = 0;
-time_t timer::pause = 0;
-int timer::paused_seconds = 0;
-bool timer::is_paused = false;
-
-timer::timer(int minutes) {     // costruttore
-    seconds = minutes * 60;
+timer::timer(int seconds) {     // costruttore
+    this->seconds = seconds % 60;
     start = time(nullptr);
     pause = time(nullptr);
     paused_seconds = 0;
