@@ -10,7 +10,7 @@ struct lista {         // il corpo dello snake è realizzato tramite una lista d
     lista *next;
 };
 typedef lista *plista;
-constexpr double tempo=200;   //utile per la veocità dello snake
+constexpr double tempo=200;   //utile per la velocità dello snake
 constexpr int alt=25;    //altezza della matrice
 constexpr int larg=100;   //larghezza della matrice
 extern int lserp;
