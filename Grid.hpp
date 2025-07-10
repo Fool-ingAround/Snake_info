@@ -7,10 +7,10 @@
 struct sgrid {
     bool occupied; //come matrice booleana
     char item; //tipo di item (corpo, head, vuoto etc.)
-    int id; //id (identifica il numero dell'oggetto)
+    int id; //id (identifica il numero identificativo dell'oggetto)
 };
 
-constexpr int rows = 25;
+constexpr int rows = 25; //costanti utili
 constexpr int cols = 100;
 constexpr int COLOR_SNAKE = 8;
 constexpr int COLOR_APPLE = 9;
@@ -19,31 +19,30 @@ constexpr int COLOR_CHERRY = 11;
 
 class Grid {
 protected:
-    sgrid matrix[rows][cols]; //matrice in cui ogni punto ha le 3 informazioni
-    bool endgame; //valore da controllare
+    sgrid matrix[rows][cols]; //matrice in cui ogni punto ha 3 informazioni: occupato/libero, che tipo di item e l'id del frutto (se c'è)
+    bool endgame; //valore da controllare ogni volta, se diventa true la partita è finita
     int score; // score totale del livello
-    int counter; //lo uso per dare gli id agli oggetto
-    timer Chain; //timer che crea un nuovo oggetto ogni volta
-    timer Random; //timer che crea un oggetto a caso
-    bool chainitem;
+    int counter; //utilizzato per variare l'id ogni volta che viene creato un oggetto
+    timer Chain; //timer che crea un nuovo oggetto ogni volta che un item del tipo chainitem viene mangiato
+    timer Random; //timer che crea un oggetto ogni tanto a intervalli semiregolari
+    int chaintime; //intervallo fra un chainitem e l'altro
+    int randomtime1; //questo e quello dopo sono i due valori entro cui il timer random spawna l'oggetto
+    int randomtime2; //^^^
+    bool chainitem; //variabile che indica se è già presente l'item del chaintimer
     int difficulty;
-    bool waspaused;
+    bool waspaused; //variabile che diventa true se il gioco è stato messo in pausa. è un ottimizzazzione
+
 public:
 
-    Grid(int rows, int columns, int difficulty);
-    void Updatemtx(snake a, timer pause); //aggiorna la matrice
-    void Collision(int i, int j); //collisione con oggetto
-    void addItem(bool type); //aggiunge un item (devo ancora implementare la funzione che ne aggiunga uno periodicamente)
-    void removeItem(int id); //ancora da implementare
-    //bool addSnake(int y, int x); FUNZIONI VECCHIE DA IGNORARE PER ORA
-    //void removeSnake(int y, int x);
-    //bool CheckGrid(int y, int x);
+    Grid(int rows, int columns, int difficulty); //costruttore
+    void Updatemtx(snake snake, timer pause); //aggiorna la matrice con il serpente e gli oggetti, ha in input il serpente e il timer per fermare il gioco
+    void Collision(int i, int j); //viene chiamata quando vi è una collisione con un oggetto nel punto i, j
+    void addItem(bool type); //aggiunge un nuovo item nel gioco (type indica se è un chainitem o no)
+    void removeItem(int id, bool collision); //rimuove l'item con un certo id (collision serve a sapere se è una collisione o no)
     bool isendgame(); //ritorna true se il giocatore ha perso
     void setendgame(bool flag); //serve a cambiare il valore di endgame
-    void UpdateScore(WINDOW * info_win);
-    void UpdateGrid(WINDOW* game_win);
-    void newrandom(); //per fare ripartire il timer random?? boh
-    void provagrid(int a, int b, int c, int d);
+    void UpdateScore(WINDOW * info_win); //stampa la finestra di gioco
+    void UpdateGrid(WINDOW* game_win); //stampa la finestra dello score
 
 };
 
