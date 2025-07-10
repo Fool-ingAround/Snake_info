@@ -10,9 +10,12 @@ using namespace std;
 
 pitemlist Items::head = nullptr;
 
-Items::Items() = default;
+Items::Items(int difficulty) {
 
-void Items::newitem(int difficulty, int id) { //questa viene chiamata alla creazione di un item
+    this->difficulty = difficulty;
+}
+
+void Items::newitem(int difficulty, int id, bool type) { //questa viene chiamata alla creazione di un item
     srand(time(nullptr));
     pitemlist tmp;
     char item;
@@ -43,10 +46,11 @@ void Items::newitem(int difficulty, int id) { //questa viene chiamata alla creaz
             head = new itemlist;
             head->next = nullptr;
             head->prev = nullptr;
+            head->type = type;
             head->id = id;
             head->item = item;
             head->points = points;
-            head->timeleft = timeleft;
+            head->itemtimer = timer(timeleft);
             head->position.i = y;
             head->position.j = x;
             }
@@ -54,10 +58,11 @@ void Items::newitem(int difficulty, int id) { //questa viene chiamata alla creaz
             tmp = new itemlist;
             tmp->next = head;
             tmp->prev = nullptr;
+            tmp->type = type;
             tmp->id = id;
             tmp->item = item;
             tmp->points = points;
-            tmp->timeleft = timeleft;
+            tmp->itemtimer = timer(timeleft);
             tmp->position.i = y;
             tmp->position.j = x;
             head->prev = tmp;
@@ -171,9 +176,32 @@ pos Items::getposition(int id) { //N sta per null
     }
 }
 
-int Items::gettime(int id) { //N sta per null
-    if (head == nullptr) {
-        return -1;
+void Items::pausealltimers() {
+    if (head == nullptr);
+    else {
+        pitemlist tmp = head;
+        while (tmp != nullptr) {
+            tmp->itemtimer.pause_timer();
+            tmp = tmp->next;
+        }
+    }
+}
+
+void Items::resumealltimers() {
+    if (head == nullptr);
+    else {
+        pitemlist tmp = head;
+        while (tmp != nullptr) {
+            tmp->itemtimer.resume_timer();
+            tmp = tmp->next;
+        }
+    }
+}
+
+
+bool Items::gettimer(int id) { //ritorna true se il timer dell'item è finito
+    if (head == nullptr) { //se la lista è vuota
+        return false;
     }
     else
     {
@@ -183,8 +211,23 @@ int Items::gettime(int id) { //N sta per null
         }
         if (tmp == nullptr)
         {
-            return -1;
+            return false;
         }
-        else return tmp->timeleft;
+        else return tmp->itemtimer.time_out(); //ritorna true se il timer è finito
+    }
+}
+
+bool Items::returntype(int id) {
+    if (head == nullptr) return true;
+    else {
+        pitemlist tmp = head;
+        while (tmp != nullptr && tmp->id != id) {
+            tmp = tmp->next;
+        }
+        if (tmp == nullptr)
+        {
+            return true;
+        }
+        else return tmp->type;
     }
 }

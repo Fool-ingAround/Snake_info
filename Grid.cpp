@@ -3,13 +3,20 @@
 #include "movimento.hpp"
 #include <iostream>
 #include <ncurses.h>
+#include "timer.hpp"
 using namespace std;
 
-Grid::Grid(int rows, int columns) { //Inizializzo la matrice a inizio partita
+Grid::Grid(int rows, int columns, int diff) { //Inizializzo la matrice a inizio partita
     endgame = false; //questo campo diventa true solo se il serpente si mangia o finisce il tempo, ci si accede con endgame(bool flag)
     score = 0; //inizializzo anche lo score
     counter = 1; //counter che aumenta ogni volta che creo un nuovo oggetto (in pratica è l'id di ogni oggetto)
-    //   allid = nullptr;
+    waspaused = false;
+    difficulty = diff;
+    chainitem = false;
+    int funzioneancoradafare1 = 0; //AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA
+    int funzioneancoradafare2 = 0;
+    Chain = timer(funzioneancoradafare1);
+    Random = timer(funzioneancoradafare2);
     for (int i = 0; i < rows; i++) {
         for (int j = 0; j < columns; j++) {
             matrix[i][j].occupied = false;
@@ -27,52 +34,88 @@ Grid::Grid(int rows, int columns) { //Inizializzo la matrice a inizio partita
     init_pair(4, COLOR_CHERRY, COLOR_BLACK); // Colore Pesca
 }
 
-void Grid::Updatemtx(snake snake) { //a ogni ciclo aggiorno la mia matrice
-    pos head = snake.get_head();
-    for (int i = 0; i < rows; i++) { //per ogni riga
-        for (int j = 0; j < cols; j++) { //per ogni colonna
-            if (snake.snake::isoccupied(i, j) == true) { //Se è un pezzo del serpente
-                if (head.i == i &&  head.j == j && matrix[i][j].occupied == false) //Case: Testa va in posto vuoto
-                {
-                    matrix[i][j].occupied = true;
-                    matrix[i][j].item = 'h';
-                }
-                else if (head.i != i &&  head.j != j) //Case: non sto prendendo in considerazione la testa
-                {
-                    matrix[i][j].occupied = true;
-                    matrix[i][j].item = 's';
-                }
-                else if (head.i != i &&  head.j != j && matrix[i][j].occupied == true) //Case: Collisione
-                {
-                    if (matrix[i][j].item == 's')
-                    { //Case;: serpente si è mangiato da solo, setto l'endgame a true
-                        setendgame(true);
+//ATTENZIONE DA FARE SEMPRE DOPOOOOOOOOOOOO L'AGGIORNAMENTO DEL SERPENTE
+//ad ogni Updatemtx devo controllare: se devo spawnare un item con chain -> if (Chain.timeout) ->
+//se devo spawnare un item con random
+//se devo rimuovere un item
+
+
+
+
+
+void Grid::Updatemtx(snake snake, timer gametimer) {
+    int funzioneancoradafare1 = 0;
+    int funzioneancoradafare2 = 0;
+    //a ogni ciclo aggiorno la mia matrice
+    if (gametimer.ispaused()) { //Se il gioco è stato messo in pausa fermo anche tutti i timer
+        Chain.pause_timer();
+        Random.pause_timer();
+        Items::pausealltimers();
+        waspaused = true; //ottimizzazione
+    }
+    else if (waspaused == true) { //se il gioco era stato messo in pausa ed è ripartito faccio ripartire i timer
+        Chain.resume_timer();
+        Random.resume_timer();
+        Items::resumealltimers();
+        waspaused = false;
+    }
+    else { //aggiornamento effettivo della matrice
+        pos head = snake.get_head();
+        for (int i = 0; i < rows; i++) { //per ogni riga
+            for (int j = 0; j < cols; j++) { //per ogni colonna
+                if (snake.isoccupied(i, j) == true) { //Se è un pezzo del serpente
+                    if (head.i == i &&  head.j == j && matrix[i][j].occupied == false) //Case: Testa va in posto vuoto
+                    {
+                        matrix[i][j].occupied = true;
                         matrix[i][j].item = 'h';
                     }
-                    else if (matrix[i][j].item == 'a' || matrix[i][j].item == 'b' || matrix[i][j].item == 'c') //Case: serpente ha mangiato qualcosa nel punto (y,x)
+                    else if (head.i != i &&  head.j != j) //Case: non sto prendendo in considerazione la testa
                     {
-                    Collision(i, j);
+                        matrix[i][j].occupied = true;
+                        matrix[i][j].item = 's';
+                    }
+                    else if (head.i != i &&  head.j != j && matrix[i][j].occupied == true) //Case: Collisione
+                    {
+                        if (matrix[i][j].item == 's')
+                        { //Case;: serpente si è mangiato da solo, setto l'endgame a true
+                            setendgame(true);
+                            matrix[i][j].item = 'h';
+                        }
+                        else if (matrix[i][j].item == 'a' || matrix[i][j].item == 'b' || matrix[i][j].item == 'c') //Case: serpente ha mangiato qualcosa nel punto (y,x)
+                        {
+                            Collision(i, j);
+                        }
                     }
                 }
+                else if (snake.isoccupied(i, j) == false && matrix[i][j].occupied == true && matrix[i][j].item == 's') { //Rimuovo l'ultimo pezzo del serpente precedente
+                    matrix[i][j].occupied = false;
+                    matrix[i][j].item = 'e';
+                }
             }
-            else if (snake.isoccupied(i, j) == false && matrix[i][j].occupied == true && matrix[i][j].item == 's') { //Rimuovo l'ultimo pezzo del serpente precedente
-                matrix[i][j].occupied = false;
-                matrix[i][j].item = 'e';
-            }
+        }
+        if (Chain.time_out() && chainitem); //se il timer di chainitem è a 0 ma l'item è già in campo allora non faccio nulla
+        else if (Chain.time_out() && !chainitem) //se il timer di chainitem è a 0 ma l'item non c'è -> devo crearlo
+        {
+            Chain = timer(funzioneancoradafare1);
+            addItem(true);
+            chainitem = true;
+        }
+    if (Random.time_out()) {
+        Random = timer(funzioneancoradafare2);
+        addItem(false);
         }
     }
 }
-
 void Grid::Collision(int i, int j) { //la implemento appena ho finito con le funzioni di Items
     pos cell;
     cell.i = i;
     cell.j = j;
     score = score + Items::getpoints(matrix[i][j].id);
-    Grid::removeItem(matrix[i][j].id);
+    removeItem(matrix[i][j].id);
 }
 
-void Grid::addItem(int difficulty) {
-    Items::newitem(difficulty, counter); //creo un nuovo item con id counter
+void Grid::addItem(bool type) {
+    Items::newitem(difficulty, counter, type); //creo un nuovo item con id counter
     pos position = Items::getposition(counter); //salvo in pos le coordinate dell'item
     while (matrix[position.i][position.i].occupied == true) { //controllo che non sia un punto già occupato
         position = Items::changepos(counter); //creo due nuove coordinate
@@ -80,20 +123,19 @@ void Grid::addItem(int difficulty) {
     matrix[position.i][position.j].occupied = true; //il nuovo posto viene segnato come occupato
     matrix[position.i][position.j].item = Items::getitem(counter); //specifico che tipo di item è
     matrix[position.i][position.j].id = counter; //salvo nella cella l'id dell'item
-    //          /Timer::starttimer(Items::gettime(counter))
     counter++;
 }
 
 void Grid::removeItem(int id) {
     if (Items::checkid(id)) { //se l'oggetto è ancora in campo e va rimosso
         pos coords = Items::getposition(id);
-        if (Items::gettime(id) == 0) { //se l'oggetto va rimosso perchè il timer è expired
+        if (Items::gettimer(id)) { //se l'oggetto va rimosso perchè il timer è expired (se ritorna true il timer è finito)
             matrix[coords.i][coords.j].occupied = false;
             matrix[coords.i][coords.j].item = 'e';
             matrix[coords.i][coords.j].id = 0;
             Items::removeitem(id);
         }
-        else if (Items::gettime(id) != 0){
+        else if (!Items::gettimer(id)){ //se ritorna false il timer NON è finito -> collisione
             matrix[coords.i][coords.j].occupied = true;
             matrix[coords.i][coords.j].item = 'h';
             matrix[coords.i][coords.j].id = 0;
@@ -112,7 +154,7 @@ void Grid::setendgame(bool flag) { //funzione che segnala la fine del gioco
 
 void Grid::UpdateGrid(WINDOW *game_win) {
     wclear(game_win);
-    wrefresh(game_win);
+    //wrefresh(game_win); non necessario secondo me da controllare se funziona senza
     for (int i = 0; i < rows; i++) {
         for (int j = 0; j < cols; j++) {
             switch (matrix[i][j].item) {
