@@ -1,5 +1,8 @@
 #include "livelli.hpp"
-#include <pdcurses.h>
+
+livelli::livelli() {
+        head = nullptr;
+}
 
 plistb livelli::crea_livelli() {
     const plistb head = new listab;

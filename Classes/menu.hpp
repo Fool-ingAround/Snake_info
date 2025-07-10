@@ -9,8 +9,14 @@
 
 
 class menu {
+private:
+    static char player_name[21];
+    static int state;
+    static int difficulty;
+    static bool not_played[10];
 public:
-    menu()= default;
+    menu();
+    static void start_up();
     static void colorsetup();
     static int main_menu();
     static int player_select(char* name);

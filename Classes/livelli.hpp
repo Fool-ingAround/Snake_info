@@ -1,7 +1,3 @@
-//
-// Created by utente on 02/07/2025.
-//
-
 #ifndef LIVELLI_H
 #define LIVELLI_H
 
@@ -14,15 +10,11 @@ struct listab {
 typedef listab * plistb;
 
 class livelli {
-    protected:
+private:
     plistb head;
 public:
-    livelli () {
-        head = nullptr;
-    }
-
+    livelli();
     static plistb crea_livelli();
-
     static int get_val(plistb current);
 };
 

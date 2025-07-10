@@ -4,7 +4,6 @@
 timer::timer(int seconds) {     // costruttore
     this->seconds = seconds;
     start = time(nullptr);
-    pause = time(nullptr);
     paused_seconds = 0;
     is_paused = false;
 }
@@ -61,4 +60,8 @@ void timer::display(WINDOW *window, int y, int x) {         // funzione che stam
     int seconds = remaining % 60;
     mvwprintw(window, y, x, "%d:%02d", minutes, seconds);
     wrefresh(window);
+}
+
+bool timer::ispaused() {
+    return is_paused;
 }

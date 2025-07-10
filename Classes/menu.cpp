@@ -5,6 +5,11 @@
 #include "timer.hpp"
 #include <cstring>
 
+int menu::state;
+int menu::difficulty;
+bool menu::not_played[10];
+char menu::player_name[21];
+
 void menu::colorsetup() {            // funzione da chiamare nel main subito dopo initscr();
     init_color(11, 1000, 329, 271);  // mela rossa
     init_pair(11, 11, -1);
@@ -62,6 +67,65 @@ void menu::colorsetup() {            // funzione da chiamare nel main subito dop
         init_pair(30 + i, color_id, -1);
     }
 
+}
+
+menu::menu() {
+    player_name[0] = '\0';
+    state = 0;
+    difficulty = 1;
+    not_played[10];
+    for (int i = 0; i < 10; i++) {
+        not_played[i] = true;
+    }
+}
+
+void menu::start_up() {
+    initscr();
+
+    if (has_colors()) {
+        start_color();
+        use_default_colors();
+    }
+
+    menu::colorsetup();
+
+    cbreak();
+    keypad(stdscr, true);
+    noecho();
+    curs_set(0);
+
+    while (state != 4) {
+        switch (state) {
+            case 0:
+                player_name[0] = '\0';
+                for (int i = 0; i < 10; i++) {
+                    not_played[i] = true;
+                }
+                state = menu::main_menu();
+            break;
+            case 1:
+                state = menu::leaderboard();
+            break;
+            case 2:
+                if (player_name[0] == '\0') {
+                    if (menu::player_select(player_name) == 0) {
+                        state = 0;
+                        break;
+                    }
+                }
+                difficulty = menu::level_select(player_name, not_played);
+                if (difficulty == 0) {
+                    state = 0;
+                } else {
+                    state = 3;
+                }
+            break;
+            case 3:
+                state = menu::new_game(difficulty);
+            break;
+        }
+    }
+    endwin();
 }
 
 /*
@@ -226,7 +290,7 @@ int menu::player_select(char* name) {
 
 
 int menu::new_game(int difficulty) {
-    int minutes = 3;
+    int seconds = 180;
     int matrix_h = 25;              // altezza griglia di gioco
     int matrix_w = 100;             // larghezza griglia di gioco
     int info_h = 6;                 // altezza finestra del punteggio/tempo
@@ -249,7 +313,7 @@ int menu::new_game(int difficulty) {
     wrefresh(info_win);
     int waitforinput = wgetch(game_win);                        // player input
     wclear(game_win);                                           // rimuovo il messaggio temporaneo
-    timer t = timer(minutes);                                          // un timer viene istanziato tramite costruttore, parte il timer interno del... timer t
+    timer t = timer(seconds);                                          // un timer viene istanziato tramite costruttore, parte il timer interno del... timer t
     nodelay(game_win, true);                                    // serve per aggiornare correttamente il timer nel ciclo di gioco. Settandolo a false il timer si aggiornerebbe esclusivamente quando il player preme qualcosa
     while (!(t.time_out()) && (game)) {                         // uso due guardie perché distinguo due casi: fine partita per timeout o per collisione
 
@@ -275,10 +339,10 @@ int menu::new_game(int difficulty) {
             case 'p': {
                 nodelay(game_win, false);                       // se premo p si apre il menu di pausa, metto il nodelay a false per stoppare il timer e chiamare l'altra funzione
                 t.pause_timer();
-                int result = pause(game_win, info_win);         // il menu di pausa ritorna 404 se il player decide di riprendere la partita, 0 se il player vuole tornare al menu principale, 2 se il player vuole tornare alla schermata di selezione del livello
+                int result = pause(game_win, info_win);         // il menu di pausa ritorna 573 se il player decide di riprendere la partita, 0 se il player vuole tornare al menu principale, 2 se il player vuole tornare alla schermata di selezione del livello
                 t.resume_timer();
                 nodelay(game_win, true);                        // setto nuovamente il nodelay a true
-                if (result == 404) {
+                if (result == 573) {
                     break;                                      // ritorna al game
                 } else {
                     return result;                              // chiama un altro menu nel main
@@ -940,13 +1004,12 @@ int menu::pause(WINDOW * game_win, WINDOW * info_win) {
                 wrefresh(pmenu);
                 delwin(pmenu);
                 paused = false;
-                return 404;     // premere esc è come scegliere l'opzione resume
+                return 573;     // premere esc è come scegliere l'opzione resume
             case 10:
                 switch (selection) {
                     case 1:         // resume
                         paused = false;
-                        return 404;     // torna al gioco
-                        break;
+                        return 573;     // torna al gioco
                     case 2:             // quit level
                         wclear(pmenu);
                         wclear(game_win);
