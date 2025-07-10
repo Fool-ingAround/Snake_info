@@ -8,14 +8,14 @@ plista snake::crea_corpo(plista head, int ax, int ord, char c) {     //funzione 
     tmp->next=head;
     return tmp;
 }
-snake::snake(int diff, WINDOW * w) {   //il costruttore prende ha come unico parametro la difficoltà del livello
+snake::snake(int diff, WINDOW * w) {   //il costruttore ha come parametri la difficoltà del livello e la finestra di gioco ovvero la griglia
     difficulty=diff;
     win=w;
     int i=0;
     int j=0;
     for (i=0; i<alt; i++) {
         for (j=0; j<larg; j++) {
-            matrix[i][j]=false;    //la matrice booleana viene inizzializzata tutta a false cioè è vuota
+            matrix[i][j]=false;    //la matrice booleana viene inizializzata tutta a false cioè è vuota
         }
     }
     int n;
@@ -23,7 +23,7 @@ snake::snake(int diff, WINDOW * w) {   //il costruttore prende ha come unico par
     for (n=lserp-1; n>0; n--) {
         head=crea_corpo(head, larg/2-n, alt/2, 'o');    //si costruisce il corpo del serpente attraverso la funzione crea_corpo che inserisce i pezzi in testa
         matrix[alt/2][larg/2-n]=true;   //i punti in cui si trova il serpente vengono marcati con true
-    }   //di default si è deciso di creare il serpente con la testa al centro della matrice e che guarda verso destra
+    }   //di default si è deciso di creare il serpente con la testa al centro della matrice che guarda verso destra
     head=crea_corpo(head, larg/2-n, alt/2, '@');    //si differenzia la testa dal corpo
     matrix[alt/2][larg/2-n]=true;
 }
