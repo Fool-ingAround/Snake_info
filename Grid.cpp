@@ -1,5 +1,6 @@
 #include "Grid.hpp"
 #include "Items.hpp"
+#include "movimento.hpp"
 #include <iostream>
 #include <ncurses.h>
 using namespace std;
@@ -26,21 +27,22 @@ Grid::Grid(int rows, int columns) { //Inizializzo la matrice a inizio partita
     init_pair(4, COLOR_CHERRY, COLOR_BLACK); // Colore Pesca
 }
 
-void Grid::Updatemtx(bool *mtx[][cols], bool *mtH[][cols]) { //a ogni ciclo aggiorno la mia matrice
+void Grid::Updatemtx(snake snake) { //a ogni ciclo aggiorno la mia matrice
+    pos head = snake.get_head();
     for (int i = 0; i < rows; i++) { //per ogni riga
         for (int j = 0; j < cols; j++) { //per ogni colonna
-            if (*mtx[i][j] == true) { //Se è un pezzo del serpente
-                if (*mtH[i][j] == true && matrix[i][j].occupied == false) //Case: Testa va in posto vuoto
+            if (snake.snake::isoccupied(i, j) == true) { //Se è un pezzo del serpente
+                if (head.i == i &&  head.j == j && matrix[i][j].occupied == false) //Case: Testa va in posto vuoto
                 {
                     matrix[i][j].occupied = true;
                     matrix[i][j].item = 'h';
                 }
-                else if (*mtH[i][j] == false) //Case: non sto prendendo in considerazione la testa
+                else if (head.i != i &&  head.j != j) //Case: non sto prendendo in considerazione la testa
                 {
                     matrix[i][j].occupied = true;
                     matrix[i][j].item = 's';
                 }
-                else if (*mtH[i][j] == true && matrix[i][j].occupied == true) //Case: Collisione
+                else if (head.i != i &&  head.j != j && matrix[i][j].occupied == true) //Case: Collisione
                 {
                     if (matrix[i][j].item == 's')
                     { //Case;: serpente si è mangiato da solo, setto l'endgame a true
@@ -53,7 +55,7 @@ void Grid::Updatemtx(bool *mtx[][cols], bool *mtH[][cols]) { //a ogni ciclo aggi
                     }
                 }
             }
-            else if (*mtx[i][j] == false && matrix[i][j].occupied == true && matrix[i][j].item == 's') { //Rimuovo l'ultimo pezzo del serpente precedente
+            else if (snake.isoccupied(i, j) == false && matrix[i][j].occupied == true && matrix[i][j].item == 's') { //Rimuovo l'ultimo pezzo del serpente precedente
                 matrix[i][j].occupied = false;
                 matrix[i][j].item = 'e';
             }

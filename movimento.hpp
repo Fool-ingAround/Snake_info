@@ -2,6 +2,7 @@
 #define MOVIMENTO_H
 #include <iostream>
 #include <ncurses.h>
+#include "Items.hpp"
 using namespace std;
 struct lista {         // il corpo dello snake è realizzato tramite una lista di caratteri e due variabili che indicano le coordinate di ogni pezzo del suo corpo
     char corpo;
@@ -23,8 +24,9 @@ protected:
     int difficulty;   //difficoltà del livello
 public:
     plista crea_corpo(plista head, int ax, int  ord, char c);
-    snake(int diff=1, WINDOW *w);
-    void get_head(bool matrixtemp[alt][larg]);
+    snake(int diff=1, WINDOW *w =newwin(25,100,0,0));
+    pos get_head();
+    bool isoccupied(int y, int x);
     void get_matrix(bool matrixtemp[alt][larg]);
     void stampa_snake();
     void dequeue();
@@ -38,4 +40,3 @@ public:
     void movements();
 };
 #endif
-

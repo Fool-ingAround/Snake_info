@@ -1,7 +1,7 @@
 #ifndef GRID_HPP
 #define GRID_HPP
 #include <ncurses.h>
-
+#include "movimento.hpp"
 struct sgrid {
     bool occupied; //come matrice booleana
     char item; //tipo di item (corpo, head, vuoto etc.)
@@ -24,11 +24,10 @@ protected:
 public:
 
     Grid(int rows, int columns);
-    void Updatemtx(bool *mtx[][100], bool *mtH[][100]); //aggiorna la matrice
+    void Updatemtx(snake a); //aggiorna la matrice
     void Collision(int i, int j); //collisione con oggetto
     void addItem(int difficulty); //aggiunge un item (devo ancora implementare la funzione che ne aggiunga uno periodicamente)
     void removeItem(int id); //ancora da implementare
-    //void PrintGrid(bool *mtx); //quella che stamperà la finestra
     //bool addSnake(int y, int x); FUNZIONI VECCHIE DA IGNORARE PER ORA
     //void removeSnake(int y, int x);
     //bool CheckGrid(int y, int x);
