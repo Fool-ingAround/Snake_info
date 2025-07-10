@@ -27,7 +27,6 @@ public:
     snake(int diff=1, WINDOW *w =newwin(25,100,0,0));
     pos get_head();
     bool isoccupied(int y, int x);
-    void get_matrix(bool matrixtemp[alt][larg]);
     void stampa_snake();
     void dequeue();
     void schermata_iniziale();
