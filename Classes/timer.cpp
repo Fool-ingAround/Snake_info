@@ -2,7 +2,7 @@
 #include <pdcurses.h>
 
 timer::timer(int seconds) {     // costruttore
-    this->seconds = seconds % 60;
+    this->seconds = seconds;
     start = time(nullptr);
     pause = time(nullptr);
     paused_seconds = 0;

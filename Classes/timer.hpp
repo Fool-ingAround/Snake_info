@@ -11,7 +11,7 @@ protected:
      time_t pause;
      bool is_paused;
 public:
-    timer(int seconds);
+    timer(int seconds = 180);
     void pause_timer();
     void resume_timer();
     int time_left();
