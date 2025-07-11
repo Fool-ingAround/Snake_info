@@ -19,22 +19,22 @@ void Items::newitem(int difficulty, int id, bool type) { //questa viene chiamata
             item = 'A';
             points = 100;
             timeleft = 40/difficulty+6; //tempo di permanenza della mela prima che sia expired
-            y = rand() % rows; //posizione della mela
-            x = rand() % cols;
+            y = rand() % (rows-1) +1; //posizione della mela
+            x = rand() % (cols-1) +1;
             }
         else if (chance <= 84) { //Banana
             item = 'B';
             points = 150;
             timeleft = (70/difficulty+9)/2;
-            y = rand() % rows;
-            x = rand() % cols;
+            y = rand() % (rows-1) +1;
+            x = rand() % (cols-1) +1;
             }
         else { //Ciliegia
             item = 'C';
             points = 200;
             timeleft = 30/difficulty+3;
-            y = rand() % rows;
-            x = rand() % cols;
+            y = rand() % (rows-1) +1;
+            x = rand() % (cols-1) +1;
             }
         if (head == nullptr) { //se è il primo oggetto / l'unico in campo aggiorno direttamente la testa con un head insert
             head = new itemlist;
@@ -71,11 +71,26 @@ void Items::removeitem(int id) { //funzione che rimuove l'item con un certo id d
         tmp = tmp->next;
     }
     if (tmp == nullptr); //se sto cercando di eliminare un item che non esiste
-    else if (tmp->id == id)
+    else if (tmp->id == id) //l'item da eliminare esiste
     {
-        tmp->prev->next = tmp->next;
-        tmp->next->prev = tmp->prev;
-        delete tmp;
+        if (tmp->prev == nullptr && tmp->next == nullptr) { //l'item è l'unico nella lista
+            delete tmp; //lo elimino
+            head = nullptr; //testa punta a null; lista vuota
+        }
+        else if (tmp->prev == nullptr && tmp->next != nullptr) { //se l'item è il primo e ce ne sono più di uno
+            head = tmp->next; //head punta al secondo item
+            head->prev = nullptr; //head prev punta a null
+            delete tmp; //cancello il primo item;
+        }
+        else if (tmp->next == nullptr && tmp->prev != nullptr) { //se l'item è l'ultimo
+            tmp->prev->next = nullptr; //il campo next del penultimo item punta a null;
+            delete tmp; //cancello l'ultimo item
+        }
+        else if (tmp->next != nullptr && tmp->prev != nullptr) { //se l'item è in mezzo alla lista
+            tmp->next->prev = tmp->prev;
+            tmp->prev->next = tmp->next;
+            delete tmp;
+        }
     }
 }
 
@@ -88,8 +103,8 @@ pos Items::changepos(int id) { //funzione chiamata da Grid::newItem nel caso le 
     if (tmp == nullptr) return {0, 0}; //se per qualche motivo sto cercando di cambiare le variabili di un item che non esiste di default lo metto a 0 0
     else if (tmp->id == id)
     {
-        tmp->position.i = rand() % rows; //genero due nuove coordinate per l'item
-        tmp->position.j = rand() % cols;
+        tmp->position.i = rand() % (rows-1)+1; //genero due nuove coordinate per l'item
+        tmp->position.j = rand() % (cols-1)+1;
     }
     return tmp->position; //ritorno la nuova posizione
 }
@@ -124,6 +139,7 @@ int Items::expiredtimers() { //funzione che controlla se almeno un timer è expi
         tmp = tmp->next;
     }
     if (tmp == nullptr) return -1;
+    return 0;
 }
 
 void Items::deleteallitems() {
