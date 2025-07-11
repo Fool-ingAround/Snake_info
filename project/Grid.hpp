@@ -41,7 +41,7 @@ public:
     void removeItem(int id, bool collision); //rimuove l'item con un certo id (collision serve a sapere se è una collisione o no)
     bool isendgame(); //ritorna true se il giocatore ha perso
     void setendgame(bool flag); //serve a cambiare il valore di endgame
-    void UpdateScore(WINDOW * info_win); //stampa la finestra di gioco
+    int UpdateScore(); //stampa la finestra di gioco
     void UpdateGrid(WINDOW* game_win); //stampa la finestra dello score
 
 };

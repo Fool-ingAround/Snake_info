@@ -77,15 +77,7 @@ Grid::Grid(int rows, int columns, int diff): Chain(4), Random(13) {
             matrix[i][j].item = 'e';
             matrix[i][j].id = 0;
         }
-    } //qui inizializzo tutti i colori e le coppie belle
-    init_color(COLOR_SNAKE, 0, 1000, 0);
-    init_color(COLOR_APPLE, 1000, 200, 200);
-    init_color(COLOR_BANANA, 1000, 1000, 0);
-    init_color(COLOR_CHERRY, 1000, 0, 0);
-    init_pair(200, COLOR_SNAKE, COLOR_BLACK); // Colore dello snake
-    init_pair(201, COLOR_APPLE, COLOR_BLACK); // Colore Mela
-    init_pair(203, COLOR_BANANA, COLOR_BLACK); // Colore Banana
-    init_pair(204, COLOR_CHERRY, COLOR_BLACK); // Colore Pesca
+    }
 }
 
 void Grid::Updatemtx(snake snake, timer gametimer) { //funzione più importante, aggiorna a ogni movimento del serpente la griglia di gioco
@@ -201,23 +193,23 @@ void Grid::UpdateGrid(WINDOW *game_win) { //funzione che stampa nella finestra p
         for (int j = 0; j < cols; j++) {
             switch (matrix[i][j].item) { //in base a cosa è presente in ogni cella stampo un certo carattere
                 case 'h':
-                    mvwaddch(game_win, i, j, '@' | COLOR_PAIR(200));
+                    mvwaddch(game_win, i, j, '@' | COLOR_PAIR(12));
                     break;
 
                 case 's':
-                    mvwaddch(game_win, i, j, 'o' | COLOR_PAIR(200));
+                    mvwaddch(game_win, i, j, 'o' | COLOR_PAIR(12));
                     break;
 
                 case 'A':
-                    mvwaddch(game_win, i, j, 'A' | COLOR_PAIR(201));
+                    mvwaddch(game_win, i, j, 'A' | COLOR_PAIR(11));
                     break;
 
                 case 'B':
-                    mvwaddch(game_win, i, j, 'B' | COLOR_PAIR(202));
+                    mvwaddch(game_win, i, j, 'B' | COLOR_PAIR(21));
                     break;
 
                 case 'C':
-                    mvwaddch(game_win, i, j, 'C' | COLOR_PAIR(203));
+                    mvwaddch(game_win, i, j, 'C' | COLOR_PAIR(28));
                     break;
                 default:
 
@@ -227,8 +219,6 @@ void Grid::UpdateGrid(WINDOW *game_win) { //funzione che stampa nella finestra p
     }
 }
 
-void Grid::UpdateScore(WINDOW * info_win) {
-    wclear(info_win);
-mvwprintw(info_win, 0, 0, "%i", score);
-    wrefresh(info_win);
+int Grid::UpdateScore() {
+    return score;
 }

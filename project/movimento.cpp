@@ -90,7 +90,6 @@ bool snake::inversione(int a, int b) {   //controlla se accade un'inversione cio
     return (a==KEY_UP && b==KEY_DOWN)|| (a==KEY_LEFT && b==KEY_RIGHT) || (a==KEY_DOWN && b==KEY_UP) || (a==KEY_RIGHT && b==KEY_LEFT);
 }
 int snake::movements(int last, int input) {
-    nodelay(win, true);
     int ultima_azione = last;
     int prossimo_verso = last;
 

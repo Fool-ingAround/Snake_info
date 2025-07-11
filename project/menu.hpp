@@ -11,10 +11,11 @@
 class menu {
 private:
     static char player_name[21];
-    static int player_score;
+    static int final_player_score;
     static int state;
     static int difficulty;
     static bool not_played[10];
+    static int level_scores[10];
 public:
     menu();
     static void start_up();
@@ -23,7 +24,6 @@ public:
     static int player_select(char* name);
     static int level_select(char* name, bool * levelarray);
     static int new_game(int difficulty);
-    static int leaderboard();
     static int pause(WINDOW * game_win, WINDOW * info_win);
     static int game_over();
     static int victory();
