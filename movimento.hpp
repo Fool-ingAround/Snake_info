@@ -24,11 +24,9 @@ protected:
 public:
     plista crea_corpo(plista head, int ax, int  ord, char c);
     snake(int diff=1, WINDOW *w);
-    void get_head(bool matrixtemp[alt][larg]);
-    void get_matrix(bool matrixtemp[alt][larg]);
-    void stampa_snake();
+    pos get_head();
+    bool isoccupied(int y, int x);
     void dequeue();
-    void schermata_iniziale();
     void UP();
     void DOWN();
     void LEFT();
