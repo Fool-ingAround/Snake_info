@@ -1,48 +1,42 @@
 #include "Items.hpp"
 #include <iostream>
 #include <ncurses.h>
-#include <ctime>
-#include <string>
-#include <cstdlib>
-//#include "timer.hpp"
 #include "Grid.hpp"
 using namespace std;
 
 pitemlist Items::head = nullptr;
 
-Items::Items(int difficulty) {
-
-    this->difficulty = difficulty;
+Items::Items(int diff) {
+    difficulty = diff;
 }
 
 void Items::newitem(int difficulty, int id, bool type) { //questa viene chiamata alla creazione di un item
     srand(time(nullptr));
-    pitemlist tmp;
     char item;
     int y, x, timeleft, points; //salvo in delle variabili temporanee i valori in base al tipo di oggetto
-    int chance = rand() % 100;
+    int chance = rand() % 100; //in base al valore di chance scelgo che tipo di item spawnare
         if (chance <= 59) { //Mela
             item = 'A';
             points = 100;
-            timeleft = (difficulty); //funzione bella ancora da fare
-            y = rand() % rows;
+            timeleft = 40/difficulty+6; //tempo di permanenza della mela prima che sia expired
+            y = rand() % rows; //posizione della mela
             x = rand() % cols;
             }
         else if (chance <= 84) { //Banana
             item = 'B';
             points = 150;
-            timeleft = (difficulty);
+            timeleft = (70/difficulty+9)/2;
             y = rand() % rows;
             x = rand() % cols;
             }
         else { //Ciliegia
             item = 'C';
             points = 200;
-            timeleft = (difficulty);
+            timeleft = 30/difficulty+3;
             y = rand() % rows;
             x = rand() % cols;
             }
-        if (head == nullptr) { //se è il primo oggetto / l'unico in campo
+        if (head == nullptr) { //se è il primo oggetto / l'unico in campo aggiorno direttamente la testa con un head insert
             head = new itemlist;
             head->next = nullptr;
             head->prev = nullptr;
@@ -54,8 +48,8 @@ void Items::newitem(int difficulty, int id, bool type) { //questa viene chiamata
             head->position.i = y;
             head->position.j = x;
             }
-        else { //nel caso vi siano già oggetti in campo metto il nuovo ogetto nella head
-            tmp = new itemlist;
+        else { //nel caso vi siano già oggetti in campo viene aggiunto un nuovo nodo alla lista con una headinsert
+            pitemlist tmp = new itemlist;
             tmp->next = head;
             tmp->prev = nullptr;
             tmp->type = type;
@@ -67,15 +61,16 @@ void Items::newitem(int difficulty, int id, bool type) { //questa viene chiamata
             tmp->position.j = x;
             head->prev = tmp;
             head = tmp;
+            //non c'è bisogno di puntare tmp a nullptr perchè la funzione finisce e tmp viene eliminato automaticamente
        }
 }
 
-void Items::removeitem(int id) {
+void Items::removeitem(int id) { //funzione che rimuove l'item con un certo id dalla lista degli item
     pitemlist tmp = head;
     while (tmp != nullptr && tmp->id != id) {
         tmp = tmp->next;
     }
-    if (tmp == nullptr) ;
+    if (tmp == nullptr); //se sto cercando di eliminare un item che non esiste
     else if (tmp->id == id)
     {
         tmp->prev->next = tmp->next;
@@ -84,44 +79,56 @@ void Items::removeitem(int id) {
     }
 }
 
-bool Items::checkid(int id) {
-    pitemlist tmp = head;
-    while (tmp != nullptr && tmp->id != id) {
-        tmp = tmp->next;
-    }
-    if (tmp == nullptr) return false;
-    else return true;
-}
-
-pos Items::changepos(int id) {
+pos Items::changepos(int id) { //funzione chiamata da Grid::newItem nel caso le coordinate generate la prima volta indicano un punto già occupato
     srand(time(nullptr));
     pitemlist tmp = head;
     while (tmp != nullptr && tmp->id != id) {
         tmp = tmp->next;
     }
-    if (tmp != nullptr) ;
+    if (tmp == nullptr) return {0, 0}; //se per qualche motivo sto cercando di cambiare le variabili di un item che non esiste di default lo metto a 0 0
     else if (tmp->id == id)
     {
-        tmp->position.i = rand() % rows;
+        tmp->position.i = rand() % rows; //genero due nuove coordinate per l'item
         tmp->position.j = rand() % cols;
     }
-    return tmp->position;
+    return tmp->position; //ritorno la nuova posizione
 }
-/* //Questa funzione probabilmente non serve più
-void Items::changetimeleft(int id) {
+
+void Items::pausealltimers() { //funzione che mette il timer di tutti gli oggetti in pausa
+    if (head == nullptr);
+    else {
+        pitemlist tmp = head;
+        while (tmp != nullptr) {
+            tmp->itemtimer.pause_timer();
+            tmp = tmp->next;
+        }
+    }
+}
+
+void Items::resumealltimers() { //funzione che fa ripartire i timer di tutti gli oggetti
+    if (head == nullptr);
+    else {
+        pitemlist tmp = head;
+        while (tmp != nullptr) {
+            tmp->itemtimer.resume_timer();
+            tmp = tmp->next;
+        }
+    }
+}
+
+int Items::expiredtimers() { //funzione che controlla se almeno un timer è expired. Se lo trova ritorna l'id dell'item, altrimenti ritorna-1
+    if (head == nullptr) return -1;
     pitemlist tmp = head;
-    while (tmp != nullptr && tmp->id != id) {
+    while (tmp != nullptr) {
+        if (tmp->itemtimer.time_out()) return tmp->id;
         tmp = tmp->next;
     }
-    if (tmp != nullptr) ;
-    else if (tmp->id == id) {
-        tmp->timeleft = 0;
-    }
+    if (tmp == nullptr) return -1;
 }
-*/
-char Items::getitem(int id) { //N sta per null
-if (head == nullptr) {
-    return 'N';
+
+char Items::getitem(int id) {
+if (head == nullptr) { //se cerco in qualche modo di ottenere il char di un item quando non ne esiste nessuno
+    return 'e';
     }
     else
     {
@@ -129,15 +136,15 @@ if (head == nullptr) {
         while (tmp != nullptr && tmp->id != id) {
             tmp = tmp->next;
         }
-        if (tmp == nullptr)
+        if (tmp == nullptr) //se cerco in qualche modo di ottenere il char di un item che non esiste
         {
-        return 'N';
+        return 'e';
         }
-        else return tmp->item;
+        else return tmp->item; //ritorno il char dell'item con un certo id
     }
 }
 
-int Items::getpoints(int id) { //N sta per null
+int Items::getpoints(int id) { //uguale a getitem ma per i punti
     if (head == nullptr) {
         return 0;
     }
@@ -155,12 +162,9 @@ int Items::getpoints(int id) { //N sta per null
     }
 }
 
-pos Items::getposition(int id) { //N sta per null
-    pos tmpv;
-    tmpv.i =-1;
-    tmpv.j =-1;
+pos Items::getposition(int id) { //uguale a getitem ma per le coordinate
     if (head == nullptr) {
-        return (tmpv);
+        return {0, 0};
     }
     else
     {
@@ -170,34 +174,11 @@ pos Items::getposition(int id) { //N sta per null
         }
         if (tmp == nullptr)
         {
-            return tmpv;
+            return {0, 0};
         }
         else return tmp->position;
     }
 }
-
-void Items::pausealltimers() {
-    if (head == nullptr);
-    else {
-        pitemlist tmp = head;
-        while (tmp != nullptr) {
-            tmp->itemtimer.pause_timer();
-            tmp = tmp->next;
-        }
-    }
-}
-
-void Items::resumealltimers() {
-    if (head == nullptr);
-    else {
-        pitemlist tmp = head;
-        while (tmp != nullptr) {
-            tmp->itemtimer.resume_timer();
-            tmp = tmp->next;
-        }
-    }
-}
-
 
 bool Items::gettimer(int id) { //ritorna true se il timer dell'item è finito
     if (head == nullptr) { //se la lista è vuota
@@ -217,7 +198,7 @@ bool Items::gettimer(int id) { //ritorna true se il timer dell'item è finito
     }
 }
 
-bool Items::returntype(int id) {
+bool Items::gettype(int id) { // come getitem ma per sapere se è un chainitem
     if (head == nullptr) return true;
     else {
         pitemlist tmp = head;
