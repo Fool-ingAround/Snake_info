@@ -79,15 +79,8 @@ Grid::Grid(int rows, int columns, int diff): Chain(4), Random(13) {
         }
     }
 }
-
 void Grid::Updatemtx(snake snake, timer gametimer) { //funzione più importante, aggiorna a ogni movimento del serpente la griglia di gioco
-    if (gametimer.ispaused()) { //Se il gioco è stato messo in pausa fermo anche tutti i timer
-        Chain.pause_timer();
-        Random.pause_timer();
-        Items::pausealltimers();
-        waspaused = true; //ottimizzazione
-    }
-    else if (waspaused == true) { //invece di far sempre "ripartire" i timer lo faccio solo se il gioco era stato messo in pausa
+    if (waspaused == true) { //invece di far sempre "ripartire" i timer lo faccio solo se il gioco era stato messo in pausa
         Chain.resume_timer();
         Random.resume_timer();
         Items::resumealltimers();
@@ -184,6 +177,15 @@ bool Grid::isendgame() { //funzione che viene chiamata ad ogni ciclo del gioco. 
 }
 void Grid::setendgame(bool flag) { //funzione che setta il gameover a true
     endgame = flag;
+}
+
+void Grid::pausetimers(timer gametimer) {
+    if (gametimer.ispaused()) { //Se il gioco è stato messo in pausa fermo anche tutti i timer
+        Chain.pause_timer();
+        Random.pause_timer();
+        Items::pausealltimers();
+        waspaused = true; //ottimizzazione
+    }
 }
 
 void Grid::UpdateGrid(WINDOW *game_win) { //funzione che stampa nella finestra presa in input tutti i punti del campo

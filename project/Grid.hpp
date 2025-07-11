@@ -12,10 +12,6 @@ struct sgrid {
 
 constexpr int rows = 25; //costanti utili
 constexpr int cols = 100;
-constexpr int COLOR_SNAKE = 101; //servono per la stampa
-constexpr int COLOR_APPLE = 102;
-constexpr int COLOR_BANANA = 103;
-constexpr int COLOR_CHERRY = 104;
 
 class Grid {
 protected:
@@ -41,6 +37,7 @@ public:
     void removeItem(int id, bool collision); //rimuove l'item con un certo id (collision serve a sapere se è una collisione o no)
     bool isendgame(); //ritorna true se il giocatore ha perso
     void setendgame(bool flag); //serve a cambiare il valore di endgame
+    void pausetimers(timer pause); //Se il gioco viene messo in pausa viene chiamata e mette in pausa tutti i timer
     int UpdateScore(); //stampa la finestra di gioco
     void UpdateGrid(WINDOW* game_win); //stampa la finestra dello score
 
