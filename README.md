@@ -15,4 +15,13 @@ int main() {
     return 0;
 }
 
+NOTE:
+- Lo scopo del gioco è fare più punti possibili (e fin qui);
+- Se il serpente si mangia la coda in un livello, lo score di quel livello è 0;
+- Se in qualunque momento, nel level select screen si decida di premere esc, verrà salvato in leaderboard il punteggio
+  totalizzato fino a quel punto;
+- Stesso vale per il new game;
+- Quando sono stati giocati tutti i livelli, si tornerà automaticamente al il main menu ed il punteggio sarà salvato in leaderboard;
+
+
 Buon divertimento :)
