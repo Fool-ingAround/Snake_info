@@ -124,6 +124,7 @@ void menu::start_up() {
                 final_player_score = 0;
                 for (int i = 0; i < 10; i++) {
                     not_played[i] = true;
+                    level_scores[i] = 0;
                 }
                 state = menu::main_menu();
             break;
@@ -135,6 +136,7 @@ void menu::start_up() {
                 break;
             case 2:
                 if (player_name[0] == '\0') {
+                    final_player_score = 0;
                     if (menu::player_select(player_name) == 0) {
                         state = 0;
                         break;
@@ -374,6 +376,7 @@ int menu::new_game(int difficulty) {
             case 'p': {
                 nodelay(game_win, false);                       // se premo p si apre il menu di pausa, metto il nodelay a false per stoppare il timer e chiamare l'altra funzione
                 t.pause_timer();
+                griglia.pausetimers(t);
                 int result = pause(game_win, info_win);         // il menu di pausa ritorna 573 se il player decide di riprendere la partita, 0 se il player vuole tornare al menu principale, 2 se il player vuole tornare alla schermata di selezione del livello
                 t.resume_timer();
                 nodelay(game_win, true);                        // setto nuovamente il nodelay a true
@@ -384,6 +387,7 @@ int menu::new_game(int difficulty) {
                     final_player_score = final_player_score + level_scores[difficulty-1];
                     classifica::inserimento(player_name, final_player_score);
                     classifica::scrivi_file();
+                    final_player_score = 0;
                     return result;
                 }
             }
@@ -402,7 +406,7 @@ int menu::new_game(int difficulty) {
                     break;
                 }
                 if (!griglia.isendgame()) {
-                    griglia.Updatemtx(s, t);
+                    griglia.Updatemtx(s);
                 }
                 t.display(info_win, info_h/2-1, info_w/2-1);        // chiamo la funzione della classe timer che date la finestra e le coordinate stampa appropriamente il tempo rimanente in minuti e secondi
                 mvwprintw(info_win, info_h/2-1, info_w/20, "Score: %i", griglia.UpdateScore());
@@ -523,6 +527,7 @@ int menu::level_select(char* player_name, bool* levelarray) {    // il menu leve
         classifica::leggi_file();
         classifica::inserimento(player_name, final_player_score);
         classifica::scrivi_file();
+        final_player_score = 0;
         return result;
     }
 
