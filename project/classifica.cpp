@@ -76,19 +76,17 @@ static bool normalizza_nome(const char* src, char* dst, std::size_t dstLen)
     return qualcosa_di_stampabile;
 }
 
-void classifica::inserimento(const char* player_in, int punteggio)
-{   if (!player_in || strlen(player_in) == 0) return;
+void classifica::inserimento(const char* player_in, int punteggio) {
+    if (!player_in || strlen(player_in) == 0) return;
 
-    // --- 1.  Normalizza / copia il nome in un buffer locale ---
     char nome[length];
-    if (!normalizza_nome(player_in, nome, sizeof(nome)))
-        return;                               // nome vuoto o totalmente “sporco”: ignoro
-
-    // --- 2.  Aggiorna la classifica in memoria (prima la carico dal file) --
-    leggi_file();     // Mantieni se vuoi ricaricare sempre la versione persistente
+    if (!normalizza_nome(player_in, nome, sizeof(nome))){
+        return;
+    }
+    leggi_file();
     bubble_sort();
 
-    // a) C’è già il giocatore? Aggiorno se serve
+
     for (int i = 0; i < length; ++i)
     {
         if (strcmp(A[i].nome, nome) == 0)
@@ -101,7 +99,7 @@ void classifica::inserimento(const char* player_in, int punteggio)
         }
     }
 
-    // b) Giocatore nuovo: trovo posizione di inserimento
+
     if (!isempty() && punteggio <= A[length - 1].score)
         return;                              // non entra in classifica
 
@@ -144,7 +142,6 @@ void classifica::leggi_file() {
         if (!InFile.getline(A[i].nome, maxchar, ':')) {
             fine = true;
         } else {
-            // 🔽 Pulizia del nome da caratteri non stampabili (tipo \r o altro)
             for (char* p = A[i].nome; *p; ++p) {
                 if (static_cast<unsigned char>(*p) < 32 || static_cast<unsigned char>(*p) > 126)
                     *p = '\0';
