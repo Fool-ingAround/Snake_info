@@ -119,24 +119,13 @@ void snake::movements() {   //funzione che gestisce tutto il movimento del serpe
     }
     napms(speed(difficulty));     //stabilisce la velocità di movimento del serpente in ms. Più la divisione della funzione speed darà n numero piccolo più si muoverà veloce il serpente, aumentando quindi la difficoltà
 }
-void snake::get_head(bool matrixtemp[alt][larg]) {   //funzione che restituisce solo la posizione della testa del serpente
-    for(int i=0; i<alt; i++) {
-        for(int j=0; j<larg; j++) {
-            if (i==head->y && j==head->x) {     //se si è arrivati alle coordinate della testa allora si imposta true
-                matrixtemp[i][j] = true;
-            }
-            else {
-                matrixtemp[i][j] = false;    //tutto il resto è false
-            }
-        }
-    }
+pos snake::get_head() {   //funzione che restituisce solo la posizione della testa del serpente
+    pos tmp;                                         
+    tmp.i = head->y;
+    tmp.j = head->x;
+    return tmp;                                                 
 }
-void snake::get_matrix(bool matrixtemp[alt][larg]) {   //restituisce la matrice aggiornata
-    for(int i=0;i<alt;i++) {
-        for(int j=0;j<larg;j++) {
-            matrixtemp[i][j]=matrix[i][j];
-        }
-    }
+bool snake::isoccupied(int y, int x){     //restituisce valore del bool in una determinata cella
+    return matrix[y][x];
 }
-
 
