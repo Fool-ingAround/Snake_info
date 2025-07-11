@@ -22,6 +22,7 @@ protected:
 public:
     classifica();
 
+    static void init();
     static void scambianodo(nodo &x, nodo &y);
     static bool isempty();
     static void bubble_sort();

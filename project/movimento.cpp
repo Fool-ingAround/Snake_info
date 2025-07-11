@@ -45,7 +45,6 @@ void snake::dequeue() {    //funzione necessaria per gestire lo spostamento del 
     matrix[coda->y][coda->x]=false;      //la posizione dell'ultimo elemento in coda viene marcata come false
     delete coda;                         // e alla fine viene eliminato l'ultimo elemento
     p->next=nullptr;
-    wrefresh(win);
 }
 void snake::UP() {
     dequeue();
@@ -90,17 +89,16 @@ bool snake::inversione(int a, int b) {   //controlla se accade un'inversione cio
     return (a==KEY_UP && b==KEY_DOWN)|| (a==KEY_LEFT && b==KEY_RIGHT) || (a==KEY_DOWN && b==KEY_UP) || (a==KEY_RIGHT && b==KEY_LEFT);
 }
 int snake::movements(int last, int input) {
+    nodelay(win, true);
     int ultima_azione = last;
     int prossimo_verso = last;
-
     if (input != ERR &&
-        (input == KEY_UP || input == KEY_DOWN || input == KEY_LEFT || input == KEY_RIGHT) &&
-        !inversione(input, last) && input != last) {
-        prossimo_verso = input;
-        ultima_azione = input;
-        }
-
-    switch (prossimo_verso) {
+        (input == KEY_UP || input == KEY_DOWN || input == KEY_LEFT || input == KEY_RIGHT) &&    //controlla che non vengano inseriti input inutli come inversioni,
+        !inversione(input, last) && input != last) {                                           //input che non riguardano le frecce e azioni che indicano la stessa
+        prossimo_verso = input;                                                               //direzione in cui il serpente sta già andando
+        }       //salvo la prossima azione
+    ultima_azione = prossimo_verso;
+    switch (ultima_azione) {
         case KEY_UP: UP(); break;
         case KEY_DOWN: DOWN(); break;
         case KEY_LEFT: LEFT(); break;

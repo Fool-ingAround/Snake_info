@@ -143,7 +143,6 @@ void Grid::Updatemtx(snake snake, timer gametimer) { //funzione più importante,
         removeItem(Items::expiredtimers(), false); //rimuovo l'item con l'id restituito da expiredtimers perchè l'item è expired (e non è una collisione)
         }
     }
-    if (endgame) Items::deleteallitems();
 }
 
 void Grid::Collision(int i, int j) { //funzione chiamata quando il serpente mangia un item
@@ -154,7 +153,7 @@ void Grid::Collision(int i, int j) { //funzione chiamata quando il serpente mang
 void Grid::addItem(bool type) { //il bool mi dice se è un item di tipo chain o random
     Items::newitem(difficulty, counter, type); //creo un nuovo item con id counter e specifico se è chain o no
     pos position = Items::getposition(counter); //salvo in pos le coordinate dell'item
-    while (matrix[position.i][position.i].occupied == true) { //controllo che non sia un punto già occupato
+    while (matrix[position.i][position.j].occupied == true) { //controllo che non sia un punto già occupato
         position = Items::changepos(counter); // se il punto dove volevo aggiungere l'item è già occupato creo due nuove coordinate
     }
     matrix[position.i][position.j].occupied = true; //il nuovo posto viene segnato come occupato
@@ -188,28 +187,31 @@ void Grid::setendgame(bool flag) { //funzione che setta il gameover a true
 }
 
 void Grid::UpdateGrid(WINDOW *game_win) { //funzione che stampa nella finestra presa in input tutti i punti del campo
-    wclear(game_win);
+    werase(game_win);
     for (int i = 0; i < rows; i++) {
         for (int j = 0; j < cols; j++) {
             switch (matrix[i][j].item) { //in base a cosa è presente in ogni cella stampo un certo carattere
+                case 'e':
+                    mvwaddch(game_win, i, j, ' ' | COLOR_PAIR(100));
+                    break;
                 case 'h':
-                    mvwaddch(game_win, i, j, '@' | COLOR_PAIR(12));
+                    mvwaddch(game_win, i, j, '@' | COLOR_PAIR(100));
                     break;
 
                 case 's':
-                    mvwaddch(game_win, i, j, 'o' | COLOR_PAIR(12));
+                    mvwaddch(game_win, i, j, 'o' | COLOR_PAIR(100));
                     break;
 
                 case 'A':
-                    mvwaddch(game_win, i, j, 'A' | COLOR_PAIR(11));
+                    mvwaddch(game_win, i, j, 'A' | COLOR_PAIR(101));
                     break;
 
                 case 'B':
-                    mvwaddch(game_win, i, j, 'B' | COLOR_PAIR(21));
+                    mvwaddch(game_win, i, j, 'B' | COLOR_PAIR(102));
                     break;
 
                 case 'C':
-                    mvwaddch(game_win, i, j, 'C' | COLOR_PAIR(28));
+                    mvwaddch(game_win, i, j, 'C' | COLOR_PAIR(103));
                     break;
                 default:
 
@@ -217,6 +219,7 @@ void Grid::UpdateGrid(WINDOW *game_win) { //funzione che stampa nella finestra p
             }
         }
     }
+    wborder(game_win, ACS_VLINE, ACS_VLINE, ACS_HLINE, ACS_HLINE, ACS_LTEE, ACS_RTEE, ACS_LLCORNER, ACS_LRCORNER);
 }
 
 int Grid::UpdateScore() {

@@ -2,12 +2,16 @@
 
 nodo classifica::A[length];
 
-classifica::classifica(){       //il costruttore inizializza l'array di nodi come vuoto, con i punteggi a 0 e i nomi vuoti
-    for (int i = 0; i < length; i++) {
-        strcpy(A[i].nome, "");
-        A[i].score=0;
-    }
+classifica::classifica() {}
+
+void classifica::init() {
+    static bool initialized = false;
+    if (initialized) return;
+    initialized = true;
+
+    leggi_file();
 }
+
 void classifica::scambianodo(nodo &x, nodo &y) {   //funzione che esegue lo scambio di due nodi contigui
     nodo temp=x;
     x=y;
@@ -47,7 +51,8 @@ void classifica::right_shift(int i) {   //esegue uno shift verso destra degli el
         A[j]=A[j-1];
     }
 }
-void classifica::inserimento(char * player, int punteggio) {   //prende in input il nome del giocatore e il suo punteggio
+void classifica::inserimento(char player[], int punteggio) {   //prende in input il nome del giocatore e il suo punteggio
+    leggi_file();
     bubble_sort();  //effettua un ordinamento
     bool trovato = false;
     int i;
@@ -86,7 +91,6 @@ void classifica::scrivi_file() {  //funzione che scrive dati in un file.txt
 void classifica::leggi_file() {
     ifstream InFile("classifica.txt");
     bool fine = false;
-
     int i = 0;
 
     while (!fine && i < length) {
@@ -94,6 +98,12 @@ void classifica::leggi_file() {
         if (!InFile.getline(A[i].nome, maxchar, ':')) {
             fine = true;
         } else {
+            // 🔽 Pulizia del nome da caratteri non stampabili (tipo \r o altro)
+            for (char* p = A[i].nome; *p; ++p) {
+                if (static_cast<unsigned char>(*p) < 32 || static_cast<unsigned char>(*p) > 126)
+                    *p = '\0';
+            }
+
             if (!(InFile >> A[i].score)) {
                 fine = true;
             } else {
@@ -102,12 +112,22 @@ void classifica::leggi_file() {
             }
         }
     }
+
     bubble_sort();
     InFile.close();
 }
 
-int classifica::stampa_file(WINDOW* leader) {
+void print_safe(WINDOW* win, int y, int x, const char* str) {
+    int i = 0;
+    while (str[i] != '\0') {
+        // Stampa ogni char ma convertito a unsigned char e senza attributi strani
+        mvwaddch(win, y, x + i, (unsigned char)str[i] & A_CHARTEXT);
+        ++i;
+    }
+}
 
+int classifica::stampa_file(WINDOW* leader) {
+    werase(leader);
     noecho();
     nodelay(leader, false);
     box(leader, 0, 0);
@@ -127,12 +147,9 @@ int classifica::stampa_file(WINDOW* leader) {
     for (int i = 0; i < 5; ++i) {
         int pair_id = 21 + i;
         wattron(leader, COLOR_PAIR(pair_id));
-        mvwprintw(leader, y_ldrbrd + i, x_ldrbrd, "%s", ldrbrd[i]);
+        print_safe(leader, y_ldrbrd + i, x_ldrbrd, ldrbrd[i]);
         wattroff(leader, COLOR_PAIR(pair_id));
     }
-
-    leggi_file();
-    scrivi_file();
 
     // Filtra solo giocatori validi (nome non vuoto e score > 0)
     nodo validi[length];
@@ -146,13 +163,20 @@ int classifica::stampa_file(WINDOW* leader) {
     // ---------- PODIO ----------
     int podium_y = y_ldrbrd + 7;
     int center_x = larg / 2;
+    char buffer[64];
 
-    if (validCount >= 1)
-        mvwprintw(leader, podium_y, center_x - 10, "1. %s: %d", validi[0].nome, validi[0].score);
-    if (validCount >= 2)
-        mvwprintw(leader, podium_y + 2, center_x - 30, "2. %s: %d", validi[1].nome, validi[1].score);
-    if (validCount >= 3)
-        mvwprintw(leader, podium_y + 2, center_x + 10, "3. %s: %d", validi[2].nome, validi[2].score);
+    if (validCount >= 1) {
+        snprintf(buffer, sizeof(buffer), "1. %s: %d", validi[0].nome, validi[0].score);
+        print_safe(leader, podium_y, center_x - 10, buffer);
+    }
+    if (validCount >= 2) {
+        snprintf(buffer, sizeof(buffer), "2. %s: %d", validi[1].nome, validi[1].score);
+        print_safe(leader, podium_y + 2, center_x - 30, buffer);
+    }
+    if (validCount >= 3) {
+        snprintf(buffer, sizeof(buffer), "3. %s: %d", validi[2].nome, validi[2].score);
+        print_safe(leader, podium_y + 2, center_x + 10, buffer);
+    }
 
     // ---------- COLONNE VERTICALI ----------
     int start_y = podium_y + 6;
@@ -163,11 +187,12 @@ int classifica::stampa_file(WINDOW* leader) {
 
     for (int i = 3; i < validCount && i < length; ++i) {
         int pos = i + 1;
-        int col = (pos - 4) / 7; // colonne: 0 (pos 4–10), 1 (11–17), 2 (18–23)
+        int col = (pos - 4) / 7; // colonne: 0 (4–10), 1 (11–17), 2 (18–23)
         if (col >= 3) break;
 
-        mvwprintw(leader, col_y[col], col_x[col], "%2d. %-20s %4d", pos, validi[i].nome, validi[i].score);
-        col_y[col] += 2;  // Aggiungi 2 per una riga vuota tra ciascun nome
+        snprintf(buffer, sizeof(buffer), "%2d. %-20s %4d", pos, validi[i].nome, validi[i].score);
+        print_safe(leader, col_y[col], col_x[col], buffer);
+        col_y[col] += 2;
     }
 
     wrefresh(leader);

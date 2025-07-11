@@ -11,7 +11,6 @@ Items::Items(int diff) {
 }
 
 void Items::newitem(int difficulty, int id, bool type) { //questa viene chiamata alla creazione di un item
-    srand(time(nullptr));
     char item;
     int y, x, timeleft, points; //salvo in delle variabili temporanee i valori in base al tipo di oggetto
     int chance = rand() % 100; //in base al valore di chance scelgo che tipo di item spawnare
@@ -19,22 +18,22 @@ void Items::newitem(int difficulty, int id, bool type) { //questa viene chiamata
             item = 'A';
             points = 100;
             timeleft = 40/difficulty+6; //tempo di permanenza della mela prima che sia expired
-            y = rand() % rows; //posizione della mela
-            x = rand() % cols;
+            y = rand() % (rows-1); //posizione della mela
+            x = rand() % (cols-1);
             }
         else if (chance <= 84) { //Banana
             item = 'B';
             points = 150;
             timeleft = (70/difficulty+9)/2;
-            y = rand() % rows;
-            x = rand() % cols;
+            y = rand() % (rows-1);
+            x = rand() % (cols-1);
             }
         else { //Ciliegia
             item = 'C';
             points = 200;
             timeleft = 30/difficulty+3;
-            y = rand() % rows;
-            x = rand() % cols;
+            y = rand() % (rows-1);
+            x = rand() % (cols-1);
             }
         if (head == nullptr) { //se è il primo oggetto / l'unico in campo aggiorno direttamente la testa con un head insert
             head = new itemlist;
@@ -100,11 +99,11 @@ pos Items::changepos(int id) { //funzione chiamata da Grid::newItem nel caso le 
     while (tmp != nullptr && tmp->id != id) {
         tmp = tmp->next;
     }
-    if (tmp == nullptr) return {0, 0}; //se per qualche motivo sto cercando di cambiare le variabili di un item che non esiste di default lo metto a 0 0
+    if (tmp == nullptr) return {10, 10}; //se per qualche motivo sto cercando di cambiare le variabili di un item che non esiste di default lo metto a 0 0
     else if (tmp->id == id)
     {
-        tmp->position.i = rand() % rows; //genero due nuove coordinate per l'item
-        tmp->position.j = rand() % cols;
+        tmp->position.i = rand() % (rows-1); //genero due nuove coordinate per l'item
+        tmp->position.j = rand() % (cols-1);
     }
     return tmp->position; //ritorno la nuova posizione
 }
@@ -140,18 +139,6 @@ int Items::expiredtimers() { //funzione che controlla se almeno un timer è expi
     }
     if (tmp == nullptr) return -1;
     return 0;
-}
-
-void Items::deleteallitems() {
-    pitemlist tmp = head;
-    if (tmp == nullptr) return;
-    pitemlist tmp2 = head->next;
-    while (tmp2 != nullptr) {
-        delete tmp;
-        tmp = tmp2;
-        tmp2 = tmp2->next;
-    }
-    delete (tmp);
 }
 
 char Items::getitem(int id) {

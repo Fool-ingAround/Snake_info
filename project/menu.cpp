@@ -52,6 +52,12 @@ void menu::colorsetup() {            // funzione da chiamare nel main subito dop
     init_color(29, 350, 350, 400); // colore livello non disponibile
     init_pair(29, 29, -1);
 
+    init_color(100, 188, 278, 153);
+
+    init_pair(100, 12, 100);
+    init_pair(101, 11, 100);
+    init_pair(102, 21, 100);
+    init_pair(103, 28, 100);
 
     int Level_colors[10][3] = { // gradiente da azzurro a rosso
         {98, 678, 682},  // azzurro
@@ -95,15 +101,17 @@ void menu::start_up() {
         use_default_colors();
     }
 
+    classifica::init();
+    WINDOW* leaderboard = newwin(30, 100, 0, 0);
+    box(leaderboard, 0, 0);
+    wrefresh(leaderboard);
     menu::colorsetup();
-    classifica init_classifica; // istanziazione: chiama il costruttore e inizializza A[]
 
     cbreak();
     keypad(stdscr, true);
     noecho();
     curs_set(0);
 
-    WINDOW* leaderboard = newwin(30, 100, 0, 0);
 
     while (state != 4) {
         switch (state) {
@@ -115,8 +123,11 @@ void menu::start_up() {
                 state = menu::main_menu();
             break;
             case 1:
+                classifica::leggi_file();
                 state = classifica::stampa_file(leaderboard);
-            break;
+                classifica::scrivi_file();
+
+                break;
             case 2:
                 if (player_name[0] == '\0') {
                     if (menu::player_select(player_name) == 0) {
@@ -124,18 +135,21 @@ void menu::start_up() {
                         break;
                     }
                 }
+
                 difficulty = menu::level_select(player_name, not_played);
                 if (difficulty == 0) {
                     state = 0;
                 } else {
                     state = 3;
                 }
+
             break;
             case 3:
                 state = menu::new_game(difficulty);
             break;
         }
     }
+    delwin(leaderboard);
     endwin();
 }
 
@@ -301,6 +315,8 @@ int menu::player_select(char* name) {
 
 
 int menu::new_game(int difficulty) {
+    srand (time(nullptr));
+
     int seconds = 180;
     int matrix_h = 25;              // altezza griglia di gioco
     int matrix_w = 100;             // larghezza griglia di gioco
@@ -311,7 +327,7 @@ int menu::new_game(int difficulty) {
     timer t = timer(seconds); // un timer viene istanziato tramite costruttore, parte il timer interno del... timer t
     snake s = snake(difficulty, game_win);
     Grid griglia = Grid(matrix_h, matrix_w, difficulty);
-
+    griglia.UpdateGrid(game_win);
     wborder(info_win, ACS_VLINE, ACS_VLINE, ACS_HLINE, ACS_HLINE, ACS_ULCORNER, ACS_URCORNER, ACS_LTEE, ACS_RTEE);
         // boxes custom per unire le due finestre visivamente
     wborder(game_win, ACS_VLINE, ACS_VLINE, ACS_HLINE, ACS_HLINE, ACS_LTEE, ACS_RTEE, ACS_LLCORNER, ACS_LRCORNER);
@@ -328,18 +344,13 @@ int menu::new_game(int difficulty) {
     wrefresh(game_win);                                         // aggiorno entrambe le finestre subito prima di wgetch();
     wrefresh(info_win);
     int waitforinput = wgetch(game_win);                        // player input
-    wclear(game_win);                                           // rimuovo il messaggio temporaneo
+    werase(game_win);    // rimuovo il messaggio temporaneo
+    wborder(game_win, ACS_VLINE, ACS_VLINE, ACS_HLINE, ACS_HLINE, ACS_LTEE, ACS_RTEE, ACS_LLCORNER, ACS_LRCORNER);
     int score_in_level = 0;
-
-
+    final_player_score = 0;
     int verso = KEY_RIGHT;
     nodelay(game_win, true);                                    // serve per aggiornare correttamente il timer nel ciclo di gioco. Settandolo a false il timer si aggiornerebbe esclusivamente quando il player preme qualcosa
     while (!(t.time_out()) && (game)) {                         // uso due guardie perché distinguo due casi: fine partita per timeout o per collisione
-
-        wborder(info_win, ACS_VLINE, ACS_VLINE, ACS_HLINE, ACS_HLINE, ACS_ULCORNER, ACS_URCORNER, ACS_LTEE, ACS_RTEE);
-            // ridisegno le boxes ad ogni ciclo per evitare errori visivi
-        wborder(game_win, ACS_VLINE, ACS_VLINE, ACS_HLINE, ACS_HLINE, ACS_LTEE, ACS_RTEE, ACS_LLCORNER, ACS_LRCORNER);
-
 
         t.display(info_win, info_h/2-1, info_w/2-1);        // chiamo la funzione della classe timer che date la finestra e le coordinate stampa appropriamente il tempo rimanente in minuti e secondi
         mvwprintw(info_win, info_h/2-1, info_w/20, "Score: %i", griglia.UpdateScore());
@@ -356,15 +367,10 @@ int menu::new_game(int difficulty) {
                     break;                                      // ritorna al game
                 } else {
                     level_scores[difficulty-1] = griglia.UpdateScore();
-                    if (result == 0) {
-                        final_player_score = final_player_score + level_scores[difficulty-1];
-                        classifica::leggi_file();
-                        classifica::inserimento(player_name, final_player_score);
-                        classifica::scrivi_file();
-                        return result;
-                    } else {
-                        return result;
-                    }
+                    final_player_score = final_player_score + level_scores[difficulty-1];
+                    classifica::inserimento(player_name, final_player_score);
+                    classifica::scrivi_file();
+                    return result;
                 }
             }
             case 27:                    // ESC
@@ -376,27 +382,37 @@ int menu::new_game(int difficulty) {
                 return 0;               // menu principale
             default:
                 verso = s.movements(verso, input);
-                griglia.Updatemtx(s, t);
 
                 if (griglia.isendgame()) {
-                game = false;
-                break;
+                    game = false;
+                    break;
+                }
+                if (!griglia.isendgame()) {
+                    griglia.Updatemtx(s, t);
                 }
 
                 griglia.UpdateGrid(game_win);
-                wrefresh(game_win);
                 break;                  // include anche il case ERR. Di base esce dallo switch
 
         }
         score_in_level = griglia.UpdateScore();
+        wrefresh(game_win);
     }
     if (game) { // di base queste linee di codice vengono lette solo una volta che si esce dal while. Quindi o vengono lette dopo un timeout (vittoria) o dopo un gameover
         level_scores[difficulty-1] = score_in_level;
+        final_player_score = level_scores[difficulty-1];
+        classifica::inserimento(player_name, final_player_score);
+        classifica::scrivi_file();
         wclear(game_win);
         wclear(info_win);
         wrefresh(info_win);
         wrefresh(game_win);
-        curs_set(0);
+    } else if (!game) {
+        score_in_level = 0;
+        level_scores[difficulty-1] = score_in_level;
+        final_player_score = level_scores[difficulty-1];
+        classifica::inserimento(player_name, final_player_score);
+        classifica::scrivi_file();
     }
     delwin(game_win);
     delwin(info_win);
@@ -493,6 +509,7 @@ int menu::level_select(char* player_name, bool* levelarray) {    // il menu leve
         classifica::scrivi_file();
         return result;
     }
+
     curs_set(0);
     int height = 30;
     int width = 70;
