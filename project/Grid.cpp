@@ -135,7 +135,6 @@ void Grid::Updatemtx(snake snake, timer gametimer) { //funzione più importante,
             chainitem = true; //il chainitem adesso è rpesente in campo
         }
     if (Random.time_out()) { //se è finito il timer degli item random
-        srand(time( nullptr));
         Random = timer(rand() % (randomtime2 - randomtime1 +1) + randomtime1); //riavvio il timer con un valore casuale nell'intervallo compreso fra i due valori
         addItem(false); //aggiungo un item di tipo random
         }
@@ -143,6 +142,7 @@ void Grid::Updatemtx(snake snake, timer gametimer) { //funzione più importante,
         removeItem(Items::expiredtimers(), false); //rimuovo l'item con l'id restituito da expiredtimers perchè l'item è expired (e non è una collisione)
         }
     }
+    if (isendgame()) Items::deleteallitems(); //se la partita è finita chiamo la funziona che dealloca tutti gli item
 }
 
 void Grid::Collision(int i, int j) { //funzione chiamata quando il serpente mangia un item
