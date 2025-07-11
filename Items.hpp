@@ -29,6 +29,7 @@ public:
     static void pausealltimers(); //se il gioco viene messo in pausa anche tutti i timer vengono messi in pausa
     static void resumealltimers(); //quando il gioco riparte ripartono tutti i timer
     static int expiredtimers(); //funzione che controlla se vi è almeno un oggetto che va rimosso perchè andato a male. ritorna l'id del primo item expired che trova o -1 se nessun item è expired
+    static void deleteallitems();
     static char getitem(int id); //queste e quelle dopo servono per accedere ai campi degli item
     static int getpoints(int id);
     static pos getposition(int id);

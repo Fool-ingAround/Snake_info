@@ -12,10 +12,10 @@ struct sgrid {
 
 constexpr int rows = 25; //costanti utili
 constexpr int cols = 100;
-constexpr int COLOR_SNAKE = 8; //servono per la stampa
-constexpr int COLOR_APPLE = 9;
-constexpr int COLOR_BANANA = 10;
-constexpr int COLOR_CHERRY = 11;
+constexpr int COLOR_SNAKE = 101; //servono per la stampa
+constexpr int COLOR_APPLE = 102;
+constexpr int COLOR_BANANA = 103;
+constexpr int COLOR_CHERRY = 104;
 
 class Grid {
 protected:

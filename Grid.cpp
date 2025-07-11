@@ -78,10 +78,10 @@ Grid::Grid(int rows, int columns, int diff) { //inizializzo la griglia di gioco 
     init_color(COLOR_APPLE,     1000, 200, 200);
     init_color(COLOR_BANANA,  1000, 1000, 0);
     init_color(COLOR_CHERRY, 1000, 0, 0);
-    init_pair(1, COLOR_SNAKE, COLOR_BLACK);   // Colore dello snake
-    init_pair(2, COLOR_APPLE, COLOR_BLACK);     // Colore Mela
-    init_pair(3, COLOR_BANANA, COLOR_BLACK);  // Colore Banana
-    init_pair(4, COLOR_CHERRY, COLOR_BLACK); // Colore Pesca
+    init_pair(200, COLOR_SNAKE, COLOR_BLACK);   // Colore dello snake
+    init_pair(201, COLOR_APPLE, COLOR_BLACK);     // Colore Mela
+    init_pair(203, COLOR_BANANA, COLOR_BLACK);  // Colore Banana
+    init_pair(204, COLOR_CHERRY, COLOR_BLACK); // Colore Pesca
 }
 
 void Grid::Updatemtx(snake snake, timer gametimer) { //funzione più importante, aggiorna a ogni movimento del serpente la griglia di gioco
@@ -147,6 +147,7 @@ void Grid::Updatemtx(snake snake, timer gametimer) { //funzione più importante,
         removeItem(Items::expiredtimers(), false); //rimuovo l'item con l'id restituito da expiredtimers perchè l'item è expired (e non è una collisione)
         }
     }
+    if (endgame) Items::deleteallitems();
 }
 
 void Grid::Collision(int i, int j) { //funzione chiamata quando il serpente mangia un item

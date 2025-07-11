@@ -126,6 +126,18 @@ int Items::expiredtimers() { //funzione che controlla se almeno un timer è expi
     if (tmp == nullptr) return -1;
 }
 
+void Items::deleteallitems() {
+    pitemlist tmp = head;
+    if (tmp == nullptr) return;
+    pitemlist tmp2 = head->next;
+    while (tmp2 != nullptr) {
+        delete tmp;
+        tmp = tmp2;
+        tmp2 = tmp2->next;
+    }
+    delete (tmp);
+}
+
 char Items::getitem(int id) {
 if (head == nullptr) { //se cerco in qualche modo di ottenere il char di un item quando non ne esiste nessuno
     return 'e';
