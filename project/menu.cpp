@@ -52,7 +52,11 @@ void menu::colorsetup() {            // funzione da chiamare nel main subito dop
     init_color(29, 350, 350, 400); // colore livello non disponibile
     init_pair(29, 29, -1);
 
+    init_color(72, 1000, 1000, 1000);
+
     init_color(100, 188, 278, 153);
+
+    init_pair(99, 72, 100); // testo con sfondo verde
 
     init_pair(100, 12, 100);
     init_pair(101, 11, 100);
@@ -117,6 +121,7 @@ void menu::start_up() {
         switch (state) {
             case 0:
                 player_name[0] = '\0';
+                final_player_score = 0;
                 for (int i = 0; i < 10; i++) {
                     not_played[i] = true;
                 }
@@ -335,12 +340,17 @@ int menu::new_game(int difficulty) {
 
     bool game = true;               // booleano per il while
     mvwprintw(info_win, info_h/2-1, info_w/2-1, "3:00");        // stampo il tempo massimo in maniera manuale aspettando l'input del player
-    mvwprintw(info_win, info_h/2-1, info_w/20, "Score: %i", griglia.UpdateScore() | COLOR_PAIR(13));
-    mvwprintw(info_win, info_h/2, info_w/20, "%s: %i", player_name, final_player_score);
-    mvwprintw(info_win, info_h/2-1, info_w-info_w/4, "Level %i", difficulty);
+    mvwprintw(info_win, info_h/2-1, info_w/20, "Score: %i", griglia.UpdateScore());
+    mvwprintw(info_win, info_h/2, info_w/20, "%s's total score: %i", player_name, final_player_score);
+    mvwprintw(info_win, info_h/2-1, info_w-info_w/7, "Level %i", difficulty);
     int y = (matrix_h / 2)-1;                                   // variabili di coordinate che verranno poi aggiornate nel ciclo di gioco
     int x = (matrix_w / 2)-1;
+    wattron(game_win, COLOR_PAIR(99));
     mvwprintw(game_win, y, x-10, "Press any key to start!");    // messaggio temporaneo
+    wattroff(game_win, COLOR_PAIR(99));
+    wattron(game_win, COLOR_PAIR(100));
+    mvwprintw(game_win, y+1, x-7, "ooooooooo@");
+    wattroff(game_win, COLOR_PAIR(100));
     keypad(game_win, true);
     noecho();
     curs_set(0);
@@ -348,15 +358,16 @@ int menu::new_game(int difficulty) {
     wrefresh(info_win);
     int waitforinput = wgetch(game_win);                        // player input
     werase(game_win);    // rimuovo il messaggio temporaneo
+    griglia.UpdateGrid(game_win);
+    wattron(game_win, COLOR_PAIR(100));
+    mvwprintw(game_win, y+1, x-7, "ooooooooo@");
+    wattroff(game_win, COLOR_PAIR(100));
     wborder(game_win, ACS_VLINE, ACS_VLINE, ACS_HLINE, ACS_HLINE, ACS_LTEE, ACS_RTEE, ACS_LLCORNER, ACS_LRCORNER);
+    wrefresh(game_win);
     int score_in_level = 0;
-    final_player_score = 0;
     int verso = KEY_RIGHT;
     nodelay(game_win, true);                                    // serve per aggiornare correttamente il timer nel ciclo di gioco. Settandolo a false il timer si aggiornerebbe esclusivamente quando il player preme qualcosa
     while (!(t.time_out()) && (game)) {                         // uso due guardie perché distinguo due casi: fine partita per timeout o per collisione
-
-        t.display(info_win, info_h/2-1, info_w/2-1);        // chiamo la funzione della classe timer che date la finestra e le coordinate stampa appropriamente il tempo rimanente in minuti e secondi
-        mvwprintw(info_win, info_h/2-1, info_w/20, "Score: %i", griglia.UpdateScore());
 
         int input = wgetch(game_win);
         switch (input) {                                        // non fa parte del codice finale e rivisitato, tutto questo è un test
@@ -393,7 +404,9 @@ int menu::new_game(int difficulty) {
                 if (!griglia.isendgame()) {
                     griglia.Updatemtx(s, t);
                 }
-
+                t.display(info_win, info_h/2-1, info_w/2-1);        // chiamo la funzione della classe timer che date la finestra e le coordinate stampa appropriamente il tempo rimanente in minuti e secondi
+                mvwprintw(info_win, info_h/2-1, info_w/20, "Score: %i", griglia.UpdateScore());
+                mvwprintw(info_win, info_h/2, info_w/20, "%s's total score: %i", player_name, final_player_score + griglia.UpdateScore());
                 griglia.UpdateGrid(game_win);
                 break;                  // include anche il case ERR. Di base esce dallo switch
 
@@ -403,7 +416,7 @@ int menu::new_game(int difficulty) {
     }
     if (game) { // di base queste linee di codice vengono lette solo una volta che si esce dal while. Quindi o vengono lette dopo un timeout (vittoria) o dopo un gameover
         level_scores[difficulty-1] = score_in_level;
-        final_player_score = level_scores[difficulty-1];
+        final_player_score += level_scores[difficulty-1];
         classifica::inserimento(player_name, final_player_score);
         classifica::scrivi_file();
         wclear(game_win);
@@ -413,7 +426,7 @@ int menu::new_game(int difficulty) {
     } else if (!game) {
         score_in_level = 0;
         level_scores[difficulty-1] = score_in_level;
-        final_player_score = level_scores[difficulty-1];
+        final_player_score += level_scores[difficulty-1];
         classifica::inserimento(player_name, final_player_score);
         classifica::scrivi_file();
     }
