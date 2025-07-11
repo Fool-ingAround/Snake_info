@@ -8,14 +8,14 @@ plista snake::crea_corpo(plista head, int ax, int ord, char c) {     //funzione 
     tmp->next=head;
     return tmp;
 }
-snake::snake(int diff, WINDOW * w) {   //il costruttore ha come parametri la difficoltà del livello e la finestra di gioco ovvero la griglia
+snake::snake(int diff, WINDOW * w) {   //il costruttore prende ha come unico parametro la difficoltà del livello
     difficulty=diff;
     win=w;
     int i=0;
     int j=0;
     for (i=0; i<alt; i++) {
         for (j=0; j<larg; j++) {
-            matrix[i][j]=false;    //la matrice booleana viene inizializzata tutta a false cioè è vuota
+            matrix[i][j]=false;    //la matrice booleana viene inizzializzata tutta a false cioè è vuota
         }
     }
     int n;
@@ -23,7 +23,7 @@ snake::snake(int diff, WINDOW * w) {   //il costruttore ha come parametri la dif
     for (n=lserp-1; n>0; n--) {
         head=crea_corpo(head, larg/2-n, alt/2, 'o');    //si costruisce il corpo del serpente attraverso la funzione crea_corpo che inserisce i pezzi in testa
         matrix[alt/2][larg/2-n]=true;   //i punti in cui si trova il serpente vengono marcati con true
-    }   //di default si è deciso di creare il serpente con la testa al centro della matrice che guarda verso destra
+    }   //di default si è deciso di creare il serpente con la testa al centro della matrice e che guarda verso destra
     head=crea_corpo(head, larg/2-n, alt/2, '@');    //si differenzia la testa dal corpo
     matrix[alt/2][larg/2-n]=true;
 }
@@ -46,42 +46,42 @@ void snake::dequeue() {    //funzione necessaria per gestire lo spostamento del 
     delete coda;                         // e alla fine viene eliminato l'ultimo elemento
     p->next=nullptr;
 }
-void snake::UP() {   //funzione dedicata allo spostamento verso l'alto del serpente
-    dequeue();   //esegue la funzione dequeue
-    head->corpo='o';       //l'elemento in testa viene sovrascritto con il carattere 'o' dato che diventerà il secondo pezzo del corpo dello snake
-    if ((head->y-1)==0) {   //controlla la testa del serpente da inserire superi il bordo della griglia di gioco. In questo caso setta la y a 1 in modo da far spuntare il serpente dal basso, avendo un effetto pacman
-        head->y=alt-2;
-    }
-    head=crea_corpo(head, head->x, head->y-1, '@');  //viene inserita la testa
-    matrix[head->y][head->x]=true;   //si marca la posizione con true
-}
-void snake::DOWN() {  //funzione dedicata allo spostamento verso il basso
-    dequeue();  //esegue la funzione dequeue
-    head->corpo='o';   //stessa cosa della funzione UP
-    if ((head->y+1)==alt-1) {   //stessa cosa di UP, ma aggiorna la y in modo da far spuntare lo snake dal lato alto della griglia
-        head->y=1;
-    }
-    head=crea_corpo(head, head->x, head->y+1, '@');  //stesso funzionamento di UP
-    matrix[head->y][head->x]=true;
-}
-void snake::LEFT() {   //funzione dedicata allo spostamento verso sinistra
+void snake::UP() {
     dequeue();
-    head->corpo='o';
-    if ((head->x-1)==0) {   //stesso funzionamento delle altre solo che in questo caso, se la condizione è vera, aggiorna la x in modo da far spuntare il serpente dal lato destro
-        head->x=larg-2;
-    }
-    head=crea_corpo(head, head->x-1, head->y, '@');
-    matrix[head->y][head->x]=true;
+    head->corpo = 'o';
+    int new_y = (head->y - 1 == 0) ? alt - 2 : head->y - 1;
+    int new_x = head->x;
+    head = crea_corpo(head, new_x, new_y, '@');
+    matrix[new_y][new_x] = true;
 }
-void snake::RIGHT() { //funzione dedicata allo spostamento verso destra
+
+void snake::DOWN() {
     dequeue();
-    head->corpo='o';
-    if ((head->x+1)==larg-1) {   //stesso funzionamento delle altre solo che in questo caso, se la condizione è vera, aggiorna la x in modo da far spuntare il serpente dal lato sinistro
-        head->x=1;
-    }
-    head=crea_corpo(head, head->x+1, head->y, '@');
-    matrix[head->y][head->x]=true;
+    head->corpo = 'o';
+    int new_y = (head->y + 1 == alt - 1) ? 1 : head->y + 1;
+    int new_x = head->x;
+    head = crea_corpo(head, new_x, new_y, '@');
+    matrix[new_y][new_x] = true;
 }
+
+void snake::LEFT() {
+    dequeue();
+    head->corpo = 'o';
+    int new_x = (head->x - 1 == 0) ? larg - 2 : head->x - 1;
+    int new_y = head->y;
+    head = crea_corpo(head, new_x, new_y, '@');
+    matrix[new_y][new_x] = true;
+}
+
+void snake::RIGHT() {
+    dequeue();
+    head->corpo = 'o';
+    int new_x = (head->x + 1 == larg - 1) ? 1 : head->x + 1;
+    int new_y = head->y;
+    head = crea_corpo(head, new_x, new_y, '@');
+    matrix[new_y][new_x] = true;
+}
+
 double snake::speed(int difficulty) {
     return tempo/(double(difficulty));   //funzione che calcola la velocità di movimento dello snake
 }
@@ -119,13 +119,24 @@ void snake::movements() {   //funzione che gestisce tutto il movimento del serpe
     }
     napms(speed(difficulty));     //stabilisce la velocità di movimento del serpente in ms. Più la divisione della funzione speed darà n numero piccolo più si muoverà veloce il serpente, aumentando quindi la difficoltà
 }
-pos snake::get_head() {   //funzione che restituisce solo la posizione della testa del serpente
-    pos tmp;
-    tmp.i = head->y;
-    tmp.j = head->x;
-    return tmp;
+void snake::get_head(bool matrixtemp[alt][larg]) {   //funzione che restituisce solo la posizione della testa del serpente
+    for(int i=0; i<alt; i++) {
+        for(int j=0; j<larg; j++) {
+            if (i==head->y && j==head->x) {     //se si è arrivati alle coordinate della testa allora si imposta true
+                matrixtemp[i][j] = true;
+            }
+            else {
+                matrixtemp[i][j] = false;    //tutto il resto è false
+            }
+        }
+    }
+}
+void snake::get_matrix(bool matrixtemp[alt][larg]) {   //restituisce la matrice aggiornata
+    for(int i=0;i<alt;i++) {
+        for(int j=0;j<larg;j++) {
+            matrixtemp[i][j]=matrix[i][j];
+        }
+    }
 }
 
-bool snake::isoccupied(int y, int x) {
-    return matrix[y][x];
-}
+
