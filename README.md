@@ -6,7 +6,8 @@ Partecipanti:
 - Carlo Cataldo Panariello: snake, movimento e leaderboard
 - Luca Pinardi: oggetti, collisioni e punteggio
 
-(IL GIOCO È STATO TESTATO QUASI TOTALMENTE IN AMBIENTE WINDOWS)
+IL GIOCO È STATO TESTATO QUASI TOTALMENTE IN AMBIENTE WINDOWS!
+Per eseguire da ambiente Linux, basta modificare gli #include <pdcurses.h> in #include <ncurses.h>.
 
 Per far partire il gioco nel main basta includere "menu.hpp" e chiamare il metodo start_up(), segue un esempio:
 
