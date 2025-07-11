@@ -79,7 +79,7 @@ Grid::Grid(int rows, int columns, int diff): Chain(4), Random(13) {
         }
     }
 }
-void Grid::Updatemtx(snake snake, timer gametimer) { //funzione più importante, aggiorna a ogni movimento del serpente la griglia di gioco
+void Grid::Updatemtx(snake snake) { //funzione più importante, aggiorna a ogni movimento del serpente la griglia di gioco
     if (waspaused == true) { //invece di far sempre "ripartire" i timer lo faccio solo se il gioco era stato messo in pausa
         Chain.resume_timer();
         Random.resume_timer();

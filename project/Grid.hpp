@@ -31,7 +31,7 @@ protected:
 public:
 
     Grid(int rows, int columns, int difficulty); //costruttore
-    void Updatemtx(snake snake, timer pause); //aggiorna la matrice con il serpente e gli oggetti, ha in input il serpente e il timer per fermare il gioco
+    void Updatemtx(snake snake); //aggiorna la matrice con il serpente e gli oggetti, ha in input il serpente e il timer per fermare il gioco
     void Collision(int i, int j); //viene chiamata quando vi è una collisione con un oggetto nel punto i, j
     void addItem(bool type); //aggiunge un nuovo item nel gioco (type indica se è un chainitem o no)
     void removeItem(int id, bool collision); //rimuove l'item con un certo id (collision serve a sapere se è una collisione o no)
