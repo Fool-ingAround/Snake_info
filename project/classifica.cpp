@@ -51,34 +51,80 @@ void classifica::right_shift(int i) {   //esegue uno shift verso destra degli el
         A[j]=A[j-1];
     }
 }
-void classifica::inserimento(char player[], int punteggio) {   //prende in input il nome del giocatore e il suo punteggio
-    leggi_file();
-    bubble_sort();  //effettua un ordinamento
-    bool trovato = false;
-    int i;
-    for (i = 0; i < length; i++) {
-        if (strcmp(A[i].nome, player) == 0) {     //si scorre tutto l'array e se si scopre che il giocatore è lo stesso e ha fatto un punteggio migliore del suo ultimo allora viene aggiornato il punteggio
-            trovato = true;
-            if (punteggio > A[i].score) {
+static bool normalizza_nome(const char* src, char* dst, std::size_t dstLen)
+{
+    bool qualcosa_di_stampabile = false;
+
+    if (dstLen == 0) return false;
+    dstLen--;                      // Riservo spazio per '\0'
+
+    std::size_t i = 0;
+    for (; src[i] != '\0' && i < dstLen; ++i)
+    {
+        unsigned char c = static_cast<unsigned char>(src[i]);
+        if (c >= 32 && c <= 126)           // range ASCII “stampabile” per PDCurses
+        {
+            dst[i] = c;
+            qualcosa_di_stampabile = true;
+        }
+        else
+        {
+            dst[i] = '?';                  // sostituisco con placeholder visibile
+        }
+    }
+    dst[i] = '\0';
+    return qualcosa_di_stampabile;
+}
+
+void classifica::inserimento(const char* player_in, int punteggio)
+{   if (!player_in || strlen(player_in) == 0) return;
+
+    // --- 1.  Normalizza / copia il nome in un buffer locale ---
+    char nome[length];
+    if (!normalizza_nome(player_in, nome, sizeof(nome)))
+        return;                               // nome vuoto o totalmente “sporco”: ignoro
+
+    // --- 2.  Aggiorna la classifica in memoria (prima la carico dal file) --
+    leggi_file();     // Mantieni se vuoi ricaricare sempre la versione persistente
+    bubble_sort();
+
+    // a) C’è già il giocatore? Aggiorno se serve
+    for (int i = 0; i < length; ++i)
+    {
+        if (strcmp(A[i].nome, nome) == 0)
+        {
+            if (punteggio > A[i].score)
                 A[i].score = punteggio;
-            }
+            bubble_sort();
+            scrivi_file();
+            return;
         }
     }
-    if (trovato==false) {  //se non è stato trovato un nome uguale a uno già presente si scorre l'array cercando un posto per inserire il nuovo nodo
-        if (isempty() || punteggio > A[length - 1].score) {   //se l'array ha spazi vuoti o il punteggio è più alto dell'ultimo in classifica
-            int pos = length - 1;  //si memorizza la posizione in pos
-            for (i = 0; i < length; i++) { //si scorre l'array
-                if (punteggio > A[i].score ||(A[i].score == 0 && strcmp(A[i].nome, "") == 0)) { //se il punteggio è maggiore dello score in quella posizione o se si trova un nodo vuoto
-                    pos = i;   //si salva la posizione raggiunta in pos
-                    i = length;   // e si esce dal ciclo immediatamente
-                   }
-            }
-            right_shift(pos);    //si esegue uno spostamento verso destra per fare spazio
-            strcpy(A[pos].nome, player);   //e si inserisce il nuovo nodo in classifica
-            A[pos].score = punteggio;
+
+    // b) Giocatore nuovo: trovo posizione di inserimento
+    if (!isempty() && punteggio <= A[length - 1].score)
+        return;                              // non entra in classifica
+
+    int pos = length - 1;
+    for (int i = 0; i < length; ++i)
+    {
+        if (punteggio > A[i].score ||
+            (A[i].score == 0 && A[i].nome[0] == '\0'))
+        {
+            pos = i;
+            break;
         }
     }
-    bubble_sort();  //alla fine si riordina l'array
+
+    right_shift(pos);
+
+    // Copia sicura con terminazione
+    strncpy(A[pos].nome, nome, sizeof(A[pos].nome) - 1);
+    A[pos].nome[sizeof(A[pos].nome) - 1] = '\0';
+    A[pos].score = punteggio;
+
+    bubble_sort();
+    scrivi_file();
 }
 void classifica::scrivi_file() {  //funzione che scrive dati in un file.txt
     ofstream OutFile;

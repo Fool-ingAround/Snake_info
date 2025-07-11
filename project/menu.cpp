@@ -268,13 +268,14 @@ int menu::player_select(char* name) {
 
         int ch = wgetch(input_win);     // prende un carattere alla volta in input. Se avessi usato mvwgetstr() non sarei riuscito ad implementare il caso in cui il player decida di uscire (ESC) dalla schermata di selezione del nome per tornare al menù principale (non necessario, ma più comodo)
         switch (ch) {
-            case 27:                    // ESC
+            case 27:  // ESC
+                name[0] = '\0';
                 noecho();
                 curs_set(0);
                 wclear(input_win);
                 wrefresh(input_win);
                 delwin(input_win);
-                return 0;       // nel main, questo rimanda al main menu
+                return 0;
 
             case 10:                    // ENTER
                 if (buffer[0] == '\0') {
@@ -334,7 +335,9 @@ int menu::new_game(int difficulty) {
 
     bool game = true;               // booleano per il while
     mvwprintw(info_win, info_h/2-1, info_w/2-1, "3:00");        // stampo il tempo massimo in maniera manuale aspettando l'input del player
-    mvwprintw(info_win, info_h/2-1, info_w/20, "Score: %i", griglia.UpdateScore());
+    mvwprintw(info_win, info_h/2-1, info_w/20, "Score: %i", griglia.UpdateScore() | COLOR_PAIR(13));
+    mvwprintw(info_win, info_h/2, info_w/20, "%s: %i", player_name, final_player_score);
+    mvwprintw(info_win, info_h/2-1, info_w-info_w/4, "Level %i", difficulty);
     int y = (matrix_h / 2)-1;                                   // variabili di coordinate che verranno poi aggiornate nel ciclo di gioco
     int x = (matrix_w / 2)-1;
     mvwprintw(game_win, y, x-10, "Press any key to start!");    // messaggio temporaneo
@@ -966,33 +969,35 @@ int menu::main_menu() {
         box(win, 0, 0);
 
         int ch = wgetch(win);
-        if (ch == KEY_UP) {             // se il player clicca la freccia verso l'alto sposta il cursore poco prima della scritta new game
-            mvwprintw(win, yNG+4, xNG-2, " ");
-            wmove(win, yNG, xNG-2);
-            wprintw(win, ">");
-            selecting_newgame = true;   // setto booleano a true
-        }
-        else if (ch == KEY_DOWN) {      // se il player clicca la freccia verso il basso sposta il cursore poco prima della scritta leaderboard
-            mvwprintw(win, yNG, xNG-2, " ");
-            wmove(win,yNG+4, xNG-2);
-            wprintw(win, ">");
-            selecting_newgame = false;  // setto booleano a false
-        }
-        else if (ch == 10 && selecting_newgame == true) {   // se il player preme invio e il booleano è true return 2 (che nel main chiama il player select)
-            wclear(win);
-            delwin(win);
-            wrefresh(win);
-            return 2;
-        }
-        else if (ch == 10 && selecting_newgame == false) {  // se il player preme invio e il booleano è false return 1 (che nel main chima la leaderboard)
-            wclear(win);
-            delwin(win);
-            wrefresh(win);
-            return 1;
-        }
-        else if (ch == 27) {        // se nel main menu premo ESC ritorno 4, che nel main fa uscire dal while
-            delwin(win);
-            return 4;
+
+        switch (ch) {
+            case KEY_UP:
+                mvwprintw(win, yNG+4, xNG-2, " ");
+                wmove(win, yNG, xNG-2);
+                wprintw(win, ">");
+                selecting_newgame = true;
+            break;
+            case KEY_DOWN:
+                mvwprintw(win, yNG, xNG-2, " ");
+                wmove(win,yNG+4, xNG-2);
+                wprintw(win, ">");
+                selecting_newgame = false;
+            break;
+            case 10:
+                playing = false;
+                if(selecting_newgame) {
+                    wclear(win);
+                    delwin(win);
+                    return 2;
+                } else {
+                    wclear(win);
+                    delwin(win);
+                    return 1;
+                }
+            case 27:
+                delwin(win);
+                return 4;
+            default: break;
         }
         wrefresh(win);
     }

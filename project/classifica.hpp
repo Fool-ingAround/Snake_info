@@ -27,7 +27,7 @@ public:
     static bool isempty();
     static void bubble_sort();
     static void right_shift(int i);
-    static void inserimento(char player[], int punteggio);
+    static void inserimento(const char player[], int punteggio);
 
     static void scrivi_file();
     static void leggi_file();
