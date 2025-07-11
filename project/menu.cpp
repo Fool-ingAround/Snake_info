@@ -423,6 +423,7 @@ int menu::new_game(int difficulty) {
         final_player_score += level_scores[difficulty-1];
         classifica::inserimento(player_name, final_player_score);
         classifica::scrivi_file();
+        Items::deleteallitems();
         wclear(game_win);
         wclear(info_win);
         wrefresh(info_win);
